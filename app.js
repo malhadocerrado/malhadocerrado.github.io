@@ -1,22 +1,40 @@
 (function(){
 'use strict';
-var H=3600, D=86400;
+var H=3600, D=86400, D3=3*D, D30=30*D;
 var todos=[], meta={}, mcDisp=false, lac=null, nov=null, zap=null;
 function $(id){return document.getElementById(id);}
 function el(t,txt,cls){var e=document.createElement(t);if(txt!=null)e.textContent=txt;if(cls)e.className=cls;return e;}
 function agora(){return Math.floor(Date.now()/1000);}
 function idade(v){if(!v)return null;return agora()-v;}
-function rel(v){var s=idade(v);if(s==null)return 'sem registro';if(s<0)s=0;
-  if(s<90)return 'agora há pouco';if(s<5400)return Math.round(s/60)+' min atrás';
-  if(s<2*D)return Math.round(s/H)+' h atrás';return Math.round(s/D)+' dias atrás';}
-function faixa(n){var s=idade(n.v);if(s==null)return 'velho';if(s<=H)return 'on';if(s<=D)return 'dia';return 'velho';}
-var COR={meshtastic:'#16a34a',meshcore:'#7c3aed'};
+function rel(v){var s=idade(v);if(s==null)return 'sem data';if(s<0)s=0;
+  if(s<90)return 'agora há pouco';if(s<5400)return 'há '+Math.round(s/60)+' min';
+  if(s<2*D)return 'há '+Math.round(s/H)+' h';
+  var d=Math.round(s/D);return 'há '+d+' dia'+(d===1?'':'s');}
+function faixa(n){var s=idade(n.v);if(s==null)return 'sem';if(s<=D)return 'ativo';if(s<=D3)return 'recente';if(s<=D30)return 'inativo';return 'fora';}
+function noMapa(n){return faixa(n)!=='fora';}
+var COR={ativo:'#16a34a',recente:'#f59e0b',inativo:'#dc2626',sem:'#9ca3af'};
+var ROTULO={ativo:'Ativo',recente:'Sem contato recente',inativo:'Inativo',sem:'Sem data',fora:'Inativo há mais de 30 dias'};
 function rede(n){return n.t==='meshcore'?'MeshCore':'Meshtastic';}
 function dh(ep){if(!ep)return '';var d=new Date(ep*1000);
   return d.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' (Brasília)';}
+function horaBR(ep){
+  var g={};new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date(ep*1000)).forEach(function(p){g[p.type]=p.value;});
+  return g.day+'/'+g.month+' '+g.hour+':'+g.minute;}
+function textoUltima(v){if(!v)return 'Última resposta: sem data';return 'Última resposta: '+horaBR(v)+' ('+rel(v)+')';}
 function dd(ep){if(!ep)return '';return new Date(ep*1000).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit'});}
 function local(n){return [n.m,n.uf].filter(Boolean).join(' - ');}
 function nz(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+function bandas(lst){var r={tot:lst.length,ativo:0,recente:0,inativo:0,sem:0,fora:0,mapa:0};
+  lst.forEach(function(n){r[faixa(n)]++;});r.mapa=r.ativo+r.recente+r.inativo+r.sem;return r;}
+
+// círculos = Meshtastic; quadrados = MeshCore (cor é o status)
+if(L.Canvas){var _upd=L.Canvas.prototype._updateCircle;
+  L.Canvas.prototype._updateCircle=function(layer){
+    if(layer.options.shape!=='square')return _upd.call(this,layer);
+    if(!this._drawing||layer._empty())return;
+    var p=layer._point,r=Math.max(Math.round(layer._radius),1),ctx=this._ctx;
+    this._drawnLayers[layer._leaflet_id]=layer;
+    ctx.beginPath();ctx.rect(p.x-r,p.y-r,2*r,2*r);this._fillStroke(ctx,layer);};}
 
 // abas (cada aba tem um endereço: #inicio, #mapa, #novidades, #lacunas, #cidades, #online, #comece, #sobre, #comunidade, #contato)
 var ALIAS={guia:'comece',estados:'cidades'};
@@ -32,59 +50,87 @@ abas.forEach(function(b){b.addEventListener('click',function(){abre(b.dataset.ab
 document.addEventListener('click',function(ev){var a=ev.target.closest&&ev.target.closest('[data-vai]');if(a){ev.preventDefault();abre(a.dataset.vai);}});
 
 // mapa principal: uma camada por rede, com liga/desliga
-var mapa=L.map('mapa',{preferCanvas:true}).setView([-14.5,-52],4);
+var mapa=L.map('mapa-principal',{preferCanvas:true}).setView([-14.5,-52],4);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenStreetMap'}).addTo(mapa);
 var camadas={meshtastic:L.layerGroup().addTo(mapa),meshcore:L.layerGroup().addTo(mapa)};
 
+var ctrl=L.control({position:(window.matchMedia&&window.matchMedia('(max-width:600px)').matches)?'topright':'bottomleft'});
+ctrl.onAdd=function(){var d=L.DomUtil.create('div','legenda-mapa');
+  d.innerHTML='<h4>Última resposta</h4>'+
+    '<div class="lin"><span class="pt c ativo"></span> Ativo (até 24 h)</div>'+
+    '<div class="lin"><span class="pt c recente"></span> Sem contato recente (24–72 h)</div>'+
+    '<div class="lin"><span class="pt c inativo"></span> Inativo (3–30 dias)</div>'+
+    '<div class="lin"><span class="pt c sem"></span> Sem data</div>'+
+    '<div class="sep"></div><h4>Rede</h4>'+
+    '<div class="lin"><span class="pt c escuro"></span> Círculo: Meshtastic</div>'+
+    '<div class="lin"><span class="pt q escuro"></span> Quadrado: MeshCore</div>';
+  L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);return d;};
+ctrl.addTo(mapa);
+
 function popup(n){var d=el('div');d.appendChild(el('strong',n.n));
-  function lin(r,v){if(v){d.appendChild(el('br'));d.appendChild(document.createTextNode(r+': '+v));}}
-  lin('Rede',rede(n));lin('Local',local(n));lin('Último contato',rel(n.v));
+  function lin(r,v){if(v){d.appendChild(el('br'));d.appendChild(document.createTextNode(r?r+': '+v:v));}}
+  var f=faixa(n);
+  lin('Rede',rede(n)+' · '+(f==='inativo'?'Inativo '+(n.v?rel(n.v):''):ROTULO[f]).trim());
+  lin('Local',local(n));
+  d.appendChild(el('br'));d.appendChild(document.createTextNode(textoUltima(n.v)));
   lin('Placa',n.hw);lin('Papel',n.f);lin('Região',n.r);if(n.fr)lin('Frequência',String(n.fr).replace('.',',')+' MHz');lin('Preset',n.p);lin('Firmware',n.fw);
   if(n.c)lin('Nome curto',n.c);
   return d;}
 
+function marcador(n,r){
+  var f=faixa(n),mc=n.t==='meshcore';
+  var m=L.circleMarker([n.la,n.lo],{radius:r!=null?r:(f==='ativo'?8:(f==='recente'?6:5)),
+    shape:mc?'square':'circle',color:'#fff',weight:1,fillColor:COR[f]||'#9ca3af',fillOpacity:.92});
+  m.bindPopup(function(){return popup(n);});
+  return m;}
+
 function redeOn(t){return $(t==='meshcore'?'c-mc':'c-mt').checked;}
 function filtrados(){
-  var uf=$('f-uf').value,at=$('f-ativ').value,q=nz($('f-busca').value.trim());
+  var uf=$('f-uf').value,so=$('f-ativos').checked,q=nz($('f-busca').value.trim());
   return todos.filter(function(n){
+    if(!noMapa(n))return false;
     if(!redeOn(n.t))return false;
     if(uf&&n.uf!==uf)return false;
-    var s=idade(n.v);
-    if(at==='1h'&&!(s!=null&&s<=H))return false;
-    if(at==='24h'&&!(s!=null&&s<=D))return false;
+    if(so&&faixa(n)!=='ativo')return false;
     if(q&&nz(n.n+' '+n.m+' '+n.i+' '+n.c).indexOf(q)<0)return false;
     return true;});}
 
 function desenha(){camadas.meshtastic.clearLayers();camadas.meshcore.clearLayers();var lst=filtrados();
-  lst.forEach(function(n){var f=faixa(n);var c=COR[n.t];
-    var m=L.circleMarker([n.la,n.lo],{radius:f==='on'?8:(f==='dia'?6:4),color:'#fff',weight:1,fillColor:c,fillOpacity:f==='on'?.95:(f==='dia'?.7:.35)});
-    m.bindPopup(function(){return popup(n);});m.addTo(camadas[n.t]);});
+  lst.forEach(function(n){marcador(n).addTo(camadas[n.t]);});
   $('f-busca').title=lst.length+' nós no mapa';
-  cartoes();}
+  cartoes();inativos();}
 function filtrosRede(){desenha();}
 
-function contagem(lst){var r={tot:lst.length,h1:0,h24:0};
-  lst.forEach(function(n){var s=idade(n.v);if(s!=null&&s<=H)r.h1++;if(s!=null&&s<=D)r.h24++;});return r;}
 function card(c,v,t){var x=el('div',null,'cartao');x.appendChild(el('b',String(v)));x.appendChild(el('span',t));c.appendChild(x);}
 
 function cartoes(){var c=$('cartoes');c.textContent='';
-  var lst=filtrados();var a=contagem(lst);
-  var mt=lst.filter(function(n){return n.t==='meshtastic';}).length,mc=lst.length-mt;
-  card(c,a.h1,'online agora (1 h)');card(c,a.h24,'ouvidos em 24 h');card(c,a.tot,'nós na seleção');
-  card(c,mt,'Meshtastic');card(c,mcDisp?mc:'em breve','MeshCore');}
+  var base=todos.filter(function(n){return noMapa(n)&&redeOn(n.t)&&(!$('f-uf').value||n.uf===$('f-uf').value);});
+  var lst=filtrados();var a=bandas(lst),b=bandas(base);
+  var mt=lst.filter(function(n){return n.t==='meshtastic';}).length;
+  card(c,a.ativo,'ativos (24 h) na seleção');
+  if(!$('f-ativos').checked){card(c,a.recente,'sem contato recente');card(c,a.inativo,'inativos no mapa (3–30 dias)');}
+  card(c,b.mapa,'nós no mapa (até 30 dias)');
+  if(b.sem)card(c,b.sem,'sem data');
+  card(c,mt,'Meshtastic na seleção');card(c,mcDisp?(lst.length-mt):'em breve','MeshCore na seleção');}
 
 function inicio(){var c=$('cartoes-inicio');c.textContent='';
-  var go=todos.filter(function(n){return n.uf==='GO';});var a=contagem(todos),g=contagem(go);
-  var mt=todos.filter(function(n){return n.t==='meshtastic';}).length;
-  var ufs={};todos.forEach(function(n){if(n.uf)ufs[n.uf]=1;});
-  var cgo={};go.forEach(function(n){if(n.m)cgo[n.m]=1;});
-  card(c,todos.length,'nós no Brasil');card(c,a.h24,'ouvidos em 24 h');card(c,Object.keys(ufs).length,'estados com nós');
-  card(c,go.length,'nós em Goiás');card(c,Object.keys(cgo).length,'cidades de Goiás com nó');
+  var br=bandas(todos),go=todos.filter(function(n){return n.uf==='GO';}),g=bandas(go);
+  var ufs={};todos.filter(noMapa).forEach(function(n){if(n.uf)ufs[n.uf]=1;});
+  var cgo={};go.filter(noMapa).forEach(function(n){if(n.m)cgo[n.m]=1;});
+  card(c,br.ativo,'ativos no Brasil (24 h)');
+  card(c,br.mapa,'no mapa (até 30 dias)');
+  card(c,br.fora,'inativos (>30 dias)');
+  if(br.sem)card(c,br.sem,'sem data');
+  card(c,g.ativo,'ativos em Goiás (24 h)');
+  card(c,g.mapa,'Goiás no mapa (até 30 dias)');
   var p=$('goias-resumo');
-  var t='Em Goiás há '+go.length+' nós no mapa ('+go.filter(function(n){return n.t==='meshtastic';}).length+' Meshtastic e '+go.filter(function(n){return n.t==='meshcore';}).length+' MeshCore), '+g.h24+' ouvidos nas últimas 24 h. ';
+  var t='Em Goiás, '+g.ativo+' nós ativos (ouvidos nas últimas 24 h) de '+g.mapa+' no mapa (até 30 dias: '+g.ativo+' ativos, '+g.recente+' sem contato recente, '+g.inativo+' inativos). ';
+  t+='Há também '+g.fora+' inativos há mais de 30 dias (só na lista, fora do mapa)'+(g.sem?(' e '+g.sem+' sem data'):'')+'. ';
+  t+='No Brasil: '+br.ativo+' ativos, '+br.recente+' sem contato recente, '+br.inativo+' inativos no mapa, '+br.fora+' inativos há mais de 30 dias'+(br.sem?(' e '+br.sem+' sem data'):'')+'. ';
   if(lac&&lac.cidades){var longe=lac.cidades.filter(function(x){return x.d>lac.lim_medio;}).length;
-    t+='Dos '+lac.cidades.length+' municípios goianos, '+longe+' ficam a mais de '+lac.lim_medio+' km de qualquer nó ativo conhecido (estimativa simples em linha reta). ';}
-  t+='Rede Brasil: '+mt+' Meshtastic e '+(todos.length-mt)+' MeshCore. Dados de '+dh(meta.mt)+'.';
+    t+='Das lacunas: dos '+lac.cidades.length+' municípios goianos, '+longe+' ficam a mais de '+lac.lim_medio+' km de qualquer nó com resposta nos últimos 30 dias (estimativa simples em linha reta). ';}
+  var mt=todos.filter(function(n){return n.t==='meshtastic';}).length;
+  t+='Total coletado: '+mt+' Meshtastic e '+(todos.length-mt)+' MeshCore. Dados de '+dh(meta.mt)+'.';
   p.textContent=t;}
 
 function ufs(){var s={};todos.forEach(function(n){if(n.uf)s[n.uf]=1;});return Object.keys(s).sort();}
@@ -94,15 +140,25 @@ function tabela(alvo,cols,linhas,vazio){var w=$(alvo);w.textContent='';
   if(!linhas.length){w.appendChild(el('p',vazio||'Nada para mostrar por enquanto.','nota'));return;}
   var wrap=el('div',null,'tabela-wrap'),t=el('table'),th=el('thead'),tr=el('tr');
   cols.forEach(function(c){var x=el('th',c.t);if(c.num)x.className='num';tr.appendChild(x);});th.appendChild(tr);t.appendChild(th);
-  var tb=el('tbody');linhas.forEach(function(l){var r=el('tr');cols.forEach(function(c){var v=c.f(l);var x=el('td',v==null||v===''?'-':String(v));if(c.num)x.className='num';r.appendChild(x);});tb.appendChild(r);});
+  var tb=el('tbody');linhas.forEach(function(l){var r=el('tr');if(l._cls)r.className=l._cls;if(l._click){r.className=(r.className?r.className+' ':'')+'clic';r.addEventListener('click',l._click);}
+    cols.forEach(function(c){var v=c.f(l);var x=el('td',v==null||v===''?'-':String(v));if(c.num)x.className='num';r.appendChild(x);});tb.appendChild(r);});
   t.appendChild(tb);wrap.appendChild(t);w.appendChild(wrap);}
+
+function inativos(){
+  var uf=$('f-uf').value,q=nz($('f-busca').value.trim());
+  var lst=todos.filter(function(n){if(faixa(n)!=='fora')return false;if(!redeOn(n.t))return false;if(uf&&n.uf!==uf)return false;if(q&&nz(n.n+' '+n.m+' '+n.i+' '+n.c).indexOf(q)<0)return false;return true;})
+    .sort(function(a,b){return (a.uf==='GO'?0:1)-(b.uf==='GO'?0:1)||(b.v||0)-(a.v||0);});
+  var go=lst.filter(function(n){return n.uf==='GO';}).length;
+  $('inativos-resumo').textContent=lst.length+' nós nesta lista'+(go?(' (deles, '+go+' em Goiás)'):'')+(lst.length>300?' — mostrando os 300 com resposta mais recente; use a busca.':'.')+' Goiás aparece primeiro.';
+  tabela('lista-inativos',[{t:'Nome',f:function(n){return n.n;}},{t:'Rede',f:rede},{t:'Local',f:local},{t:'Última resposta',f:function(n){return n.v?horaBR(n.v)+' ('+rel(n.v)+')':'sem data';}}],
+    lst.slice(0,300).map(function(n){n._cls='';return n;}),'Nenhum nó inativo há mais de 30 dias com estes filtros.');}
 
 // quem está online
 function online(){var tb=document.querySelector('#tab-online tbody');tb.textContent='';
-  var lim=$('o-janela').value==='1h'?H:D,uf=$('o-uf').value,rd=$('o-rede').value;
+  var jan=$('o-janela').value,lim=jan==='1h'?H:(jan==='72h'?D3:D),uf=$('o-uf').value,rd=$('o-rede').value;
   var lst=todos.filter(function(n){var s=idade(n.v);return s!=null&&s<=lim&&(!uf||n.uf===uf)&&(rd==='todas'||n.t===rd);}).sort(function(a,b){return b.v-a.v;});
   lst.slice(0,500).forEach(function(n){var tr=el('tr');
-    [n.n,rede(n),local(n),n.hw,n.f,rel(n.v)].forEach(function(v){tr.appendChild(el('td',v||'-'));});
+    [n.n,rede(n),local(n),n.hw,n.f,textoUltima(n.v).replace('Última resposta: ','')].forEach(function(v){tr.appendChild(el('td',v||'-'));});
     tb.appendChild(tr);});
   $('o-resumo').textContent=lst.length+' nós'+(lst.length>500?' (mostrando os 500 mais recentes)':'')+'.';}
 
@@ -110,36 +166,40 @@ function online(){var tb=document.querySelector('#tab-online tbody');tb.textCont
 function cidades(){var tb=document.querySelector('#tab-cidades tbody');tb.textContent='';
   var rd=$('ci-rede').value,uf=$('ci-uf').value,q=nz($('ci-busca').value.trim());var m={};
   todos.forEach(function(n){if(!n.m||!n.uf)return;if(rd!=='todas'&&n.t!==rd)return;if(uf&&n.uf!==uf)return;if(q&&nz(n.m).indexOf(q)<0)return;
-    var k=n.uf+'|'+n.m;var x=m[k]||(m[k]={m:n.m,uf:n.uf,tot:0,h1:0,h24:0,mt:0,mtH:0,mc:0,mcH:0});
-    var s=idade(n.v),on=s!=null&&s<=H;x.tot++;if(on)x.h1++;if(s!=null&&s<=D)x.h24++;
-    if(n.t==='meshcore'){x.mc++;if(on)x.mcH++;}else{x.mt++;if(on)x.mtH++;}});
-  var l=Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return b.h1-a.h1||b.h24-a.h24||b.tot-a.tot||a.m.localeCompare(b.m);});
-  $('ci-resumo').textContent=l.length+' cidades com nós'+(l.length>300?' (mostrando as 300 primeiras; use a busca)':'')+'.';
+    var k=n.uf+'|'+n.m,f=faixa(n);
+    var x=m[k]||(m[k]={m:n.m,uf:n.uf,tot:0,mapa:0,ativo:0,fora:0,mtA:0,mcA:0});
+    x.tot++;if(f!=='fora')x.mapa++;if(f==='ativo'){x.ativo++;if(n.t==='meshcore')x.mcA++;else x.mtA++;}if(f==='fora')x.fora++;});
+  var l=Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return b.ativo-a.ativo||b.mapa-a.mapa||b.tot-a.tot||a.m.localeCompare(b.m);});
+  $('ci-resumo').textContent=l.length+' cidades com nós'+(l.length>300?' (mostrando as 300 primeiras; use a busca)':'')+'. “Ativos (24 h)” conta só quem foi ouvido nas últimas 24 horas.';
   l.slice(0,300).forEach(function(x){var tr=el('tr',null,'clic');
-    [x.m,x.uf,x.tot,x.h1,x.h24,x.mt+' ('+x.mtH+')',mcDisp?x.mc+' ('+x.mcH+')':'-'].forEach(function(v,i){var td=el('td',String(v));if(i>1)td.className='num';tr.appendChild(td);});
+    [x.m,x.uf,x.ativo,x.mapa,x.fora,x.mtA,mcDisp?x.mcA:'-'].forEach(function(v,i){var td=el('td',String(v));if(i>1)td.className='num';tr.appendChild(td);});
     tr.addEventListener('click',function(){ficha(x.m,x.uf);});tb.appendChild(tr);});}
 
 function ficha(cid,uf){var f=$('ficha');f.textContent='';f.hidden=false;
   var ns=todos.filter(function(n){return n.m===cid&&n.uf===uf;}).sort(function(a,b){return (b.v||0)-(a.v||0);});
+  var no=ns.filter(noMapa);
   f.appendChild(el('h3','Ficha de '+cid+' - '+uf));
   var c=el('div',null,'cartoes');
-  ['meshtastic','meshcore'].forEach(function(t){var l=ns.filter(function(n){return n.t===t;});var on=l.filter(function(n){var s=idade(n.v);return s!=null&&s<=H;}).length;var d24=l.filter(function(n){var s=idade(n.v);return s!=null&&s<=D;}).length;
-    card(c,l.length,(t==='meshcore'?'MeshCore':'Meshtastic')+': '+on+' online, '+d24+' em 24 h');});
+  ['meshtastic','meshcore'].forEach(function(t){var l=ns.filter(function(n){return n.t===t;});var a=bandas(l);
+    card(c,a.ativo,(t==='meshcore'?'MeshCore':'Meshtastic')+': ativos (24 h)');
+    card(c,a.mapa,'no mapa (até 30 dias)');
+    if(a.fora)card(c,a.fora,'inativos (>30 dias)');});
   f.appendChild(c);
   if(lac&&uf==='GO'){var x=lac.cidades.filter(function(y){return y.c===cid;})[0];
-    if(x)f.appendChild(el('p','Nó ativo mais próximo (estimativa em linha reta): '+(x.d)+' km'+(x.d>0?' ('+x.nm+(x.nu?' - '+x.nu:'')+')':'')+'.','nota'));}
-  var ul=el('ul');ns.slice(0,30).forEach(function(n){ul.appendChild(el('li',n.n+' · '+rede(n)+' · último contato '+rel(n.v)));});f.appendChild(ul);
-  var b=el('button','Ver no mapa','botao');b.type='button';b.addEventListener('click',function(){$('f-uf').value=uf;$('f-busca').value=cid;desenha();abre('mapa');mapa.fitBounds(ns.map(function(n){return [n.la,n.lo];}),{maxZoom:12,padding:[30,30]});});
-  f.appendChild(b);f.scrollIntoView({behavior:'smooth',block:'nearest'});}
+    if(x)f.appendChild(el('p','Nó com resposta nos últimos 30 dias mais próximo (estimativa em linha reta): '+(x.d)+' km'+(x.d>0?' ('+x.nm+(x.nu?' - '+x.nu:'')+')':'')+'.','nota'));}
+  var ul=el('ul');ns.slice(0,30).forEach(function(n){ul.appendChild(el('li',n.n+' · '+rede(n)+' · '+ROTULO[faixa(n)]+' · '+textoUltima(n.v)));});f.appendChild(ul);
+  if(no.length){var b=el('button','Ver no mapa','botao');b.type='button';b.addEventListener('click',function(){$('f-uf').value=uf;$('f-busca').value=cid;$('f-ativos').checked=false;desenha();abre('mapa');mapa.fitBounds(no.map(function(n){return [n.la,n.lo];}),{maxZoom:12,padding:[30,30]});});
+    f.appendChild(b);}
+  f.scrollIntoView({behavior:'smooth',block:'nearest'});}
 
 function estados(){var tb=document.querySelector('#tab-estados tbody');tb.textContent='';
-  var m={};todos.forEach(function(n){var u=n.uf||'?';var x=m[u]||(m[u]={uf:u,tot:0,h1:0,h24:0,mt:0,mc:0});
-    x.tot++;if(n.t==='meshcore')x.mc++;else x.mt++;var s=idade(n.v);if(s!=null&&s<=H)x.h1++;if(s!=null&&s<=D)x.h24++;});
-  Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return b.tot-a.tot;}).forEach(function(x){
+  var m={};todos.forEach(function(n){var u=n.uf||'?';var x=m[u]||(m[u]={uf:u,tot:0,mapa:0,ativo:0,fora:0,mt:0,mc:0});
+    var f=faixa(n);x.tot++;if(f!=='fora'){x.mapa++;if(n.t==='meshcore')x.mc++;else x.mt++;}if(f==='ativo')x.ativo++;if(f==='fora')x.fora++;});
+  Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return b.ativo-a.ativo||b.mapa-a.mapa;}).forEach(function(x){
     var tr=el('tr',null,'clic');
-    [x.uf==='?'?'sem UF':x.uf,x.tot,x.h1,x.h24,x.mt,mcDisp?x.mc:'-'].forEach(function(v,i){var td=el('td',String(v));if(i>0)td.className='num';tr.appendChild(td);});
-    tr.addEventListener('click',function(){if(x.uf!=='?'){$('f-uf').value=x.uf;$('f-busca').value='';desenha();abre('mapa');
-      var p=todos.filter(function(n){return n.uf===x.uf;}).map(function(n){return [n.la,n.lo];});if(p.length)mapa.fitBounds(p,{maxZoom:9,padding:[20,20]});}});
+    [x.uf==='?'?'sem UF':x.uf,x.ativo,x.mapa,x.fora,x.mt,mcDisp?x.mc:'-'].forEach(function(v,i){var td=el('td',String(v));if(i>0)td.className='num';tr.appendChild(td);});
+    tr.addEventListener('click',function(){if(x.uf!=='?'){$('f-uf').value=x.uf;$('f-busca').value='';$('f-ativos').checked=false;desenha();abre('mapa');
+      var p=todos.filter(function(n){return n.uf===x.uf&&noMapa(n);}).map(function(n){return [n.la,n.lo];});if(p.length)mapa.fitBounds(p,{maxZoom:9,padding:[20,20]});}});
     tb.appendChild(tr);});}
 
 // textos de apoio do guia (dados reais)
@@ -152,10 +212,11 @@ function freqmc(){var c={},t=0;todos.filter(function(n){return n.t==='meshcore'&
   p.textContent='No mapa MeshCore ('+t+' nós com frequência informada): '+k.join('; ')+'. Combine os parâmetros com a comunidade local antes de ligar.';}
 function compara(){var mt=todos.filter(function(n){return n.t==='meshtastic';}).length,mc=todos.length-mt;
   var go=todos.filter(function(n){return n.uf==='GO';}),gm=go.filter(function(n){return n.t==='meshtastic';}).length;
-  $('comp-dados').textContent='No mapa hoje: '+mt+' nós Meshtastic e '+mc+' MeshCore no Brasil; em Goiás, '+gm+' Meshtastic e '+(go.length-gm)+' MeshCore.';
+  var b=bandas(todos),g=bandas(go);
+  $('comp-dados').textContent='No mapa hoje (até 30 dias): '+b.mapa+' nós no Brasil ('+b.ativo+' ativos nas últimas 24 h) e '+g.mapa+' em Goiás ('+g.ativo+' ativos). No total coletado: '+mt+' Meshtastic e '+mc+' MeshCore.';
   var h={};todos.forEach(function(n){var x=(n.hw||'').trim();if(x&&x!=='UNSET')h[x]=(h[x]||0)+1;});
   var ks=Object.keys(h).sort(function(a,b){return h[b]-h[a];}).slice(0,6);
-  $('hw-dados').textContent=ks.length?'Para ter uma ideia do que a comunidade usa, estas são as placas que mais aparecem no mapa: '+ks.map(function(k){return k+' ('+h[k]+')';}).join(', ')+'. Não é recomendação de compra.':'';}
+  $('hw-dados').textContent=ks.length?'Para ter uma ideia do que a comunidade usa, estas são as placas que mais aparecem: '+ks.map(function(k){return k+' ('+h[k]+')';}).join(', ')+'. Não é recomendação de compra.':'';}
 
 // novidades da semana (gerado pelo servidor)
 function novidades(){if(!nov){$('nov-info').textContent='Não consegui carregar as novidades agora.';return;}
@@ -176,21 +237,22 @@ var mapaLac=null;
 function iniciaMapaLac(){if(mapaLac||!lac)return;
   mapaLac=L.map('mapa-lac',{preferCanvas:true}).fitBounds([[-19.6,-53.3],[-12.3,-45.8]]);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenStreetMap'}).addTo(mapaLac);
-  var idade30=lac.janela_dias*D;
-  todos.forEach(function(n){if(!n.v||agora()-n.v>idade30)return;if(n.la<-20||n.la>-12||n.lo<-54||n.lo>-44)return;
-    L.circleMarker([n.la,n.lo],{radius:4,color:'#fff',weight:1,fillColor:COR[n.t],fillOpacity:.9}).bindPopup(function(){return popup(n);}).addTo(mapaLac);});
+  todos.filter(noMapa).forEach(function(n){if(n.la<-20||n.la>-12||n.lo<-54||n.lo>-44)return;
+    var mc=n.t==='meshcore';
+    L.circleMarker([n.la,n.lo],{radius:4,shape:mc?'square':'circle',color:'#fff',weight:1,fillColor:'#1b1f1c',fillOpacity:.9}).bindPopup(function(){return popup(n);}).addTo(mapaLac);});
   lac.cidades.forEach(function(x){var cor=x.d<=lac.lim_perto?'#16a34a':(x.d<=lac.lim_medio?'#f59e0b':'#dc2626');
     var m=L.circleMarker([x.la,x.lo],{radius:7,color:'#222',weight:1,fillColor:cor,fillOpacity:.7});
-    m.bindPopup(x.c+': nó ativo mais próximo a cerca de '+x.d+' km em linha reta'+(x.d>0?' ('+x.nm+(x.nu?' - '+x.nu:'')+')':'')+'.');m.addTo(mapaLac);});}
+    m.bindPopup(x.c+': nó com resposta nos últimos 30 dias mais próximo a cerca de '+x.d+' km em linha reta'+(x.d>0?' ('+x.nm+(x.nu?' - '+x.nu:'')+')':'')+'.');m.addTo(mapaLac);});}
 function lacunas(){if(!lac){$('lac-cartoes').textContent='Não consegui carregar os dados agora.';return;}
   $('lac-dias').textContent=lac.janela_dias;
   [].forEach.call(document.querySelectorAll('.lim1'),function(e){e.textContent=lac.lim_perto;});
   [].forEach.call(document.querySelectorAll('.lim2'),function(e){e.textContent=lac.lim_medio;});
   var c=$('lac-cartoes');c.textContent='';var cs=lac.cidades;
   var p=cs.filter(function(x){return x.d<=lac.lim_perto;}).length,l=cs.filter(function(x){return x.d>lac.lim_medio;}).length;
-  card(c,cs.length,'municípios de Goiás');card(c,p,'até '+lac.lim_perto+' km de um nó');card(c,cs.length-p-l,lac.lim_perto+' a '+lac.lim_medio+' km');card(c,l,'mais de '+lac.lim_medio+' km');card(c,lac.nos_considerados,'nós ativos considerados (Brasil)');
+  card(c,cs.length,'municípios de Goiás');card(c,p,'até '+lac.lim_perto+' km de um nó');card(c,cs.length-p-l,lac.lim_perto+' a '+lac.lim_medio+' km');card(c,l,'mais de '+lac.lim_medio+' km');
+  card(c,lac.nos_considerados,'nós com resposta nos últimos 30 dias (Brasil)');
   var top=cs.slice().sort(function(a,b){return b.d-a.d;}).slice(0,20);
-  tabela('lac-top',[{t:'Município',f:function(x){return x.c;}},{t:'Distância ao nó ativo mais próximo (km)',num:1,f:function(x){return x.d;}},{t:'Nó mais próximo em',f:function(x){return x.nm+(x.nu?' - '+x.nu:'');}},{t:'Rede',f:function(x){return x.nt==='meshcore'?'MeshCore':'Meshtastic';}}],top);
+  tabela('lac-top',[{t:'Município',f:function(x){return x.c;}},{t:'Distância ao nó mais próximo com resposta em 30 dias (km)',num:1,f:function(x){return x.d;}},{t:'Nó mais próximo em',f:function(x){return x.nm+(x.nu?' - '+x.nu:'');}},{t:'Rede',f:function(x){return x.nt==='meshcore'?'MeshCore':'Meshtastic';}}],top);
   tabela('lac-saltos',[{t:'Cidade A',f:function(x){return x.a;}},{t:'Cidade B (a mais próxima com nó)',f:function(x){return x.b;}},{t:'Distância (km)',num:1,f:function(x){return x.d;}}],lac.saltos||[],'Nenhum salto acima de '+lac.lim_medio+' km entre cidades goianas com nó.');}
 
 // comunidade
@@ -202,8 +264,9 @@ function comunidade(){var b=$('zap-botao');
 
 function tudo(){freqmc();regioes();compara();cartoes();desenha();inicio();online();estados();cidades();novidades();lacunas();comunidade();}
 
-['f-uf','f-ativ'].forEach(function(i){$(i).addEventListener('change',desenha);});
+['f-uf'].forEach(function(i){$(i).addEventListener('change',desenha);});
 $('c-mt').addEventListener('change',filtrosRede);$('c-mc').addEventListener('change',filtrosRede);
+$('f-ativos').addEventListener('change',desenha);
 $('f-busca').addEventListener('input',desenha);
 ['o-janela','o-uf','o-rede'].forEach(function(i){$(i).addEventListener('change',online);});
 ['ci-rede','ci-uf'].forEach(function(i){$(i).addEventListener('change',cidades);});$('ci-busca').addEventListener('input',cidades);
