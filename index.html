@@ -16,12 +16,23 @@
 <body>
 <header class="topo">
   <div class="marca">
-    <h1 id="titulo">Malha do Cerrado</h1>
-    <p class="sub">Redes LoRa mesh em Goiás e no Brasil</p>
+    <svg class="logo-antena" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M23 4h2v30h-2z"/>
+      <path fill="currentColor" d="M16 44h16l-4-8H20z"/>
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M17 16h14M19 22h10M21 28h6"/>
+      <path fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" d="M15 12c-4 3-4 13 0 16M33 12c4 3 4 13 0 16"/>
+      <path fill="none" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round" opacity=".9" d="M10 8c-6 5-6 19 0 24M38 8c6 5 6 19 0 24"/>
+    </svg>
+    <div class="marca-texto">
+      <h1 id="titulo">Malha do Cerrado</h1>
+      <p class="sub">Redes LoRa mesh em Goiás e no Brasil</p>
+    </div>
   </div>
   <div class="meta-topo">
     <p class="atualiza" id="atualiza">Carregando…</p>
     <p class="vendo" id="vendo" hidden></p>
+    <p class="num-versao">Versão 0.2</p>
+    <a class="selo-beta" href="#contato" data-vai="contato">Versão beta — aceitamos sugestões de melhorias e correções</a>
   </div>
 </header>
 <nav class="abas" role="tablist">
@@ -43,7 +54,7 @@
       <p>Rádios pequenos e baratos, chamados <strong>nós</strong>, repassam mensagens de texto uns dos outros, sem internet e sem operadora. Quanto mais gente liga um nó, mais longe a rede alcança. Estamos reunindo <strong>radioamadores e entusiastas de LoRa</strong> para criar mais nós em <strong>Goiás</strong> e no <strong>Brasil</strong>.</p>
       <div class="cta">
         <a class="botao" href="#comece" data-vai="comece">Monte seu nó</a>
-        <a class="botao sec" href="#comunidade" data-vai="comunidade">Entre na comunidade</a>
+        <a class="botao zap-btn btn-zap" href="https://chat.whatsapp.com/FRJ0KVLOJRkB5XQo6YUfBx" target="_blank" rel="noopener noreferrer">Entrar no grupo do WhatsApp</a>
         <a class="botao sec" href="#mapa" data-vai="mapa">Veja o mapa</a>
       </div>
     </div>
@@ -54,7 +65,7 @@
     <div class="tres">
       <div class="caixa"><h3>1. Monte seu nó</h3><p>Uma placa LoRa com antena, o firmware certo e um aplicativo no celular. O guia explica o caminho, passo a passo, em português.</p><p><a href="#comece" data-vai="comece">Ir para o guia →</a></p></div>
       <div class="caixa"><h3>2. Descubra onde ajudar</h3><p>Veja no mapa quem já está na rede e quais cidades de Goiás estão mais longe de qualquer nó conhecido.</p><p><a href="#lacunas" data-vai="lacunas">Onde falta nó →</a></p></div>
-      <div class="caixa"><h3>3. Fale com a comunidade</h3><p>Tire dúvidas, combine configurações com quem é da sua região e ajude quem está começando.</p><p><a href="#comunidade" data-vai="comunidade">Entrar na comunidade →</a></p></div>
+      <div class="caixa"><h3>3. Fale com a comunidade</h3><p>Tire dúvidas, combine configurações com quem é da sua região e ajude quem está começando.</p><p><a href="#comunidade" data-vai="comunidade">Ver regras da comunidade →</a></p><p><a class="botao zap-btn btn-zap" href="https://chat.whatsapp.com/FRJ0KVLOJRkB5XQo6YUfBx" target="_blank" rel="noopener noreferrer">Entrar no grupo do WhatsApp</a></p></div>
     </div>
     <p class="nota">Mensagens curtas e posição: é isso que uma rede LoRa mesh faz. Ela não substitui os canais oficiais de emergência (190, 192, 193 e Defesa Civil 199). <a href="#sobre" data-vai="sobre">Leia sobre o projeto.</a></p>
   </section>
@@ -96,6 +107,7 @@
     <p class="nota" id="nov-info">Carregando…</p>
     <p class="nota" id="nov-cores">No mapa, a cor indica a última resposta: <strong>verde</strong>, ativo (até 24 h); <strong>amarelo</strong>, sem contato recente (24–72 h); <strong>vermelho</strong>, inativo (3–30 dias). Nós com mais de 30 dias sem resposta saem do mapa e vão para a lista “Nós inativos”. Círculo é Meshtastic; quadrado é MeshCore. Cinza é nó sem data.</p>
     <p class="nota">Novidade no mapa: o botão <strong>Perto de mim</strong> mostra os nós mais próximos de você (a localização fica só no seu aparelho e não é enviada a ninguém). O interruptor <strong>Alcance provável</strong> desenha um círculo de 3 km em volta de cada nó ativo — é uma estimativa conservadora, sem dado de altura da antena; o alcance real depende de relevo, altura e obstáculos.</p>
+    <p class="nota">O site está em <strong>versão 0.2</strong> (beta). No cabeçalho há um selo com atalho para o formulário de <strong>Sugestões e correções</strong>. O grupo da comunidade no WhatsApp está aberto: o botão <strong>Entrar no grupo do WhatsApp</strong> aparece no início, na comunidade e no rodapé. Leia as regras antes de entrar.</p>
     <div class="cartoes" id="nov-cartoes"></div>
     <h3>Nós novos nos últimos 7 dias</h3>
     <div id="nov-novos"></div>
@@ -223,7 +235,7 @@
       <li><a href="https://meshtastic.org/docs/" target="_blank" rel="noopener">Documentação oficial do Meshtastic</a></li>
       <li><a href="https://map.meshcore.io" target="_blank" rel="noopener">Mapa oficial do MeshCore</a></li>
     </ul>
-    <div class="cta"><a class="botao" href="#comunidade" data-vai="comunidade">Dúvidas? Entre na comunidade</a></div>
+    <div class="cta"><a class="botao" href="#comunidade" data-vai="comunidade">Dúvidas? Entre na comunidade</a> <a class="botao zap-btn btn-zap" href="https://chat.whatsapp.com/FRJ0KVLOJRkB5XQo6YUfBx" target="_blank" rel="noopener noreferrer">Entrar no grupo do WhatsApp</a></div>
   </section>
 
   <section id="aba-sobre" class="aba guia">
@@ -243,8 +255,9 @@
       <li><strong>Escolha um bom lugar.</strong> Veja <a href="#lacunas" data-vai="lacunas">onde falta nó</a> e instale o seu o mais alto e desobstruído que puder.</li>
       <li><strong>Entre na <a href="#comunidade" data-vai="comunidade">comunidade</a></strong>, apresente-se e combine a configuração com quem é da sua região.</li>
       <li><strong>Ajude quem está começando</strong>: responder uma dúvida já é contribuir.</li>
-      <li><strong>Sugira melhorias</strong> pelo <a href="#contato" data-vai="contato">Fale conosco</a>.</li>
+      <li><strong>Sugira melhorias</strong> pelo <a href="#contato" data-vai="contato">formulário de sugestões e correções</a>.</li>
     </ol>
+    <p class="cta"><a class="botao zap-btn btn-zap" href="https://chat.whatsapp.com/FRJ0KVLOJRkB5XQo6YUfBx" target="_blank" rel="noopener noreferrer">Entrar no grupo do WhatsApp</a></p>
     <h3>Visão: de Goiás para o Brasil</h3>
     <p>Começamos por Goiás porque é onde estamos: o mapa mostra quantos nós já existem no estado e quais municípios estão mais longe de qualquer nó. O mapa e o guia já cobrem o Brasil inteiro, e a ideia é que cada região ganhe a sua comunidade e que as malhas locais cresçam até se encontrar. Não temos prazos nem metas fixas: o ritmo é o das pessoas que participam.</p>
     <h3>O que este site é e não é</h3>
@@ -269,32 +282,40 @@
     <p>Aqui é o ponto de encontro de quem monta, instala e usa redes LoRa mesh em Goiás, e de quem quer começar. Tire dúvidas, combine configurações e ajude a malha a crescer.</p>
     <div class="caixa zap">
       <h3>Comunidade no WhatsApp</h3>
-      <p id="zap-texto">O grupo da comunidade ainda não está aberto. Assim que o link estiver disponível, o botão abaixo será ativado.</p>
-      <p><a class="botao desativado" id="zap-botao" href="#comunidade" aria-disabled="true" tabindex="-1">Entrar no grupo (em breve)</a></p>
+      <p id="zap-texto">Entre no grupo para tirar dúvidas e conhecer quem monta nós na sua região. Leia as regras abaixo antes de participar.</p>
+      <p><a class="botao zap-btn btn-zap" href="https://chat.whatsapp.com/FRJ0KVLOJRkB5XQo6YUfBx" target="_blank" rel="noopener noreferrer">Entrar no grupo do WhatsApp</a></p>
     </div>
-    <h3>Regras de convivência</h3>
-    <ul>
-      <li>Foco em rádio e malha: LoRa, Meshtastic, MeshCore, antenas, instalação e comunicação.</li>
-      <li>Sem venda e sem divulgação de produtos ou lojas.</li>
-      <li>Sem política e sem discussões que não ajudem a comunidade.</li>
-      <li>Respeito com todos, especialmente com quem está começando.</li>
-      <li>Não divulgue dados pessoais de outras pessoas nem a localização exata de casas.</li>
-      <li>Em emergência real, acione 190, 192, 193 e a Defesa Civil (199) antes de qualquer grupo.</li>
+    <h3>Regras da comunidade</h3>
+    <ul class="regras-comunidade">
+      <li><strong>Respeito</strong> com todas as pessoas, especialmente com quem está começando.</li>
+      <li><strong>Foco</strong> em LoRa, Meshtastic e MeshCore (rádio, antenas, instalação e comunicação por malha).</li>
+      <li><strong>Sem política e sem correntes.</strong></li>
+      <li><strong>Sem spam e sem vendas</strong> sem autorização.</li>
+      <li><strong>Não divulgue a localização exata</strong> de ninguém sem permissão.</li>
+      <li>Use só as <strong>frequências legais</strong> (915 MHz, de acordo com a Anatel).</li>
+      <li><strong>Ajude os iniciantes</strong>: uma resposta clara já fortalece a malha.</li>
+      <li><strong>Sugestões e correções</strong> do site pelo <a href="#contato" data-vai="contato">formulário</a>.</li>
     </ul>
-    <h3>Enquanto isso</h3>
+    <p class="nota">Em emergência real, acione 190, 192, 193 e a Defesa Civil (199) antes de qualquer grupo.</p>
+    <h3>Outros canais</h3>
     <ul>
       <li><a href="https://www.meshbrasil.org/" target="_blank" rel="noopener">Fórum Mesh Brasil</a></li>
-      <li><a href="#contato" data-vai="contato">Fale conosco</a> por este site</li>
+      <li><a href="#contato" data-vai="contato">Formulário de sugestões e correções</a></li>
     </ul>
   </section>
 
   <section id="aba-contato" class="aba">
-    <h2>Dúvidas, sugestões e comentários</h2>
-    <p>Escreva para a equipe da Malha do Cerrado. A mensagem chega como notificação. Evite enviar senha, endereço exato ou outros dados pessoais.</p>
-    <form id="form-contato" class="formulario" novalidate>
+    <h2 id="sugestoes">Sugestões e correções</h2>
+    <p>O site está em versão beta. Use este formulário para sugerir melhorias ou avisar uma correção. Nome e cidade são opcionais. Evite enviar senha, endereço exato ou outros dados pessoais.</p>
+    <form id="form-contato" class="formulario" method="post" novalidate>
+      <input type="hidden" name="_subject" value="Sugestão · Malha do Cerrado">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" value="https://malhadocerrado.github.io/#contato">
+      <label class="hp" aria-hidden="true">Não preencha este campo<input type="text" name="_honey" tabindex="-1" autocomplete="off"></label>
       <label>Nome (opcional)<input type="text" name="nome" maxlength="80" autocomplete="name"></label>
+      <label>Cidade (opcional)<input type="text" name="cidade" maxlength="80" autocomplete="address-level2"></label>
       <label>Mensagem
-        <textarea name="mensagem" required maxlength="1000" rows="6" placeholder="Sua dúvida, sugestão ou comentário"></textarea>
+        <textarea name="mensagem" required maxlength="1000" rows="6" placeholder="Sua sugestão de melhoria ou correção"></textarea>
       </label>
       <div class="hp" aria-hidden="true">
         <label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
@@ -304,7 +325,12 @@
     </form>
   </section>
 </main>
-<footer class="rodape">Malha do Cerrado · Projeto comunitário Malha do Cerrado</footer>
+<footer class="rodape">
+  <p>{PROJETO_NOME} · {CREDITO}</p>
+  <p class="rodape-zap"><a class="botao zap-btn btn-zap" href="https://chat.whatsapp.com/FRJ0KVLOJRkB5XQo6YUfBx" target="_blank" rel="noopener noreferrer">Entrar no grupo do WhatsApp</a></p>
+  <p>Desenvolvido por Brutha Tecnologia</p>
+  <p>© {ANO} Todos os direitos reservados</p>
+</footer>
 <script src="vendor/leaflet.js"></script>
 <script src="data/cx.js"></script>
 <script src="app.js"></script>
