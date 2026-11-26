@@ -88,7 +88,7 @@ label.chk.destaque{background:#fff;border:1px solid var(--bd);border-radius:8px;
   #mapa-principal{min-height:420px}
 }
 
-#mapa-principal .leaflet-bottom.leaflet-left{margin:0 0 12px 12px}
+#mapa-principal .leaflet-bottom.leaflet-left{margin:0 0 20px 12px}
 .legenda-mapa{padding:7px 9px 8px}
 
 @media(max-width:600px){
