@@ -28,12 +28,6 @@
       <p class="sub">Redes LoRa mesh em Goiás e no Brasil</p>
     </div>
   </div>
-  <div class="meta-topo">
-    <p class="atualiza" id="atualiza">Carregando…</p>
-    <p class="vendo" id="vendo" hidden></p>
-    <p class="num-versao">Versão 0.2</p>
-    <a class="selo-beta" href="#contato" data-vai="contato">Versão beta — aceitamos sugestões de melhorias e correções</a>
-  </div>
 </header>
 <nav class="abas" role="tablist">
   <button data-aba="inicio" class="ativa">Início</button>
@@ -47,6 +41,10 @@
   <button data-aba="comunidade">Comunidade</button>
   <button data-aba="contato">Fale conosco</button>
 </nav>
+<div class="barra-meta">
+  <p class="atualiza" id="atualiza">Carregando…</p>
+  <p class="vendo" id="vendo" hidden></p>
+</div>
 <main>
   <section id="aba-inicio" class="aba ativa">
     <div class="heroi">
@@ -80,13 +78,37 @@
       <label>Estado <select id="f-uf"><option value="">Todos</option></select></label>
       <label class="chk destaque"><input type="checkbox" id="f-ativos"> Só ativos (últimas 24 h)</label>
       <label>Buscar <input id="f-busca" type="search" placeholder="nome, cidade ou id"></label>
-      <div class="perto-acoes">
-        <button type="button" id="btn-perto" class="botao">Perto de mim</button>
-        <p class="nota aviso-loc">Sua localização é usada só neste aparelho e não é enviada a ninguém.</p>
-      </div>
     </div>
-    <div class="mapa-wrap">
-      <div id="mapa-principal"></div>
+    <div class="mapa-bloco">
+      <div class="mapa-wrap">
+        <div id="mapa-principal"></div>
+      </div>
+      <div class="mapa-ferramentas">
+        <div class="mapa-ui">
+          <button type="button" id="btn-legenda" class="btn-legenda" aria-expanded="false" aria-controls="painel-legenda">Legenda</button>
+          <div id="painel-legenda" class="painel-legenda" hidden>
+            <div class="painel-legenda-cab">
+              <h4>Legenda</h4>
+              <button type="button" class="btn-fecha-legenda" aria-label="Fechar legenda">&times;</button>
+            </div>
+            <h4>Última resposta</h4>
+            <div class="lin"><span class="pt c ativo"></span> Ativo (até 24 h)</div>
+            <div class="lin"><span class="pt c recente"></span> Sem contato recente (24–72 h)</div>
+            <div class="lin"><span class="pt c inativo"></span> Inativo (3–30 dias)</div>
+            <div class="lin"><span class="pt c sem"></span> Sem data</div>
+            <div class="sep"></div>
+            <h4>Rede</h4>
+            <div class="lin"><span class="pt c escuro"></span> Círculo: Meshtastic</div>
+            <div class="lin"><span class="pt q escuro"></span> Quadrado: MeshCore</div>
+            <p class="mini">O alcance provável é uma estimativa conservadora e única (3 km), porque não temos a altura da antena. O alcance real depende de relevo, altura e obstáculos.</p>
+          </div>
+        </div>
+        <div class="mapa-barra">
+          <button type="button" id="btn-perto" class="botao">Perto de mim</button>
+          <label class="alcance-barra" title="Estimativa conservadora de 3 km, sem dado de altura da antena."><input type="checkbox" id="f-alcance"> Alcance (3 km)</label>
+        </div>
+      </div>
+      <p class="nota aviso-loc">Sua localização é usada só neste aparelho e não é enviada a ninguém.</p>
       <div id="perto-box" class="perto-box" hidden>
         <h3>Perto de você</h3>
         <p class="nota" id="perto-msg"></p>
@@ -107,7 +129,7 @@
     <p class="nota" id="nov-info">Carregando…</p>
     <p class="nota" id="nov-cores">No mapa, a cor indica a última resposta: <strong>verde</strong>, ativo (até 24 h); <strong>amarelo</strong>, sem contato recente (24–72 h); <strong>vermelho</strong>, inativo (3–30 dias). Nós com mais de 30 dias sem resposta saem do mapa e vão para a lista “Nós inativos”. Círculo é Meshtastic; quadrado é MeshCore. Cinza é nó sem data.</p>
     <p class="nota">Novidade no mapa: o botão <strong>Perto de mim</strong> mostra os nós mais próximos de você (a localização fica só no seu aparelho e não é enviada a ninguém). O interruptor <strong>Alcance provável</strong> desenha um círculo de 3 km em volta de cada nó ativo — é uma estimativa conservadora, sem dado de altura da antena; o alcance real depende de relevo, altura e obstáculos.</p>
-    <p class="nota">O site está em <strong>versão 0.2</strong> (beta). No cabeçalho há um selo com atalho para o formulário de <strong>Sugestões e correções</strong>. O grupo da comunidade no WhatsApp está aberto: o botão <strong>Entrar no grupo do WhatsApp</strong> aparece no início, na comunidade e no rodapé. Leia as regras antes de entrar.</p>
+    <p class="nota">O site está em <strong>versão 0.2</strong> (beta). No rodapé há um atalho <strong>Beta · Enviar sugestão</strong> para o formulário de sugestões e correções. O grupo da comunidade no WhatsApp está aberto: o botão <strong>Entrar no grupo do WhatsApp</strong> aparece no início, na comunidade e no rodapé. Leia as regras antes de entrar.</p>
     <div class="cartoes" id="nov-cartoes"></div>
     <h3>Nós novos nos últimos 7 dias</h3>
     <div id="nov-novos"></div>
@@ -326,10 +348,11 @@
   </section>
 </main>
 <footer class="rodape">
-  <p>{PROJETO_NOME} · {CREDITO}</p>
+  <p>Malha do Cerrado · Projeto comunitário Malha do Cerrado</p>
   <p class="rodape-zap"><a class="botao zap-btn btn-zap" href="https://chat.whatsapp.com/FRJ0KVLOJRkB5XQo6YUfBx" target="_blank" rel="noopener noreferrer">Entrar no grupo do WhatsApp</a></p>
   <p>Desenvolvido por Brutha Tecnologia</p>
-  <p>© {ANO} Todos os direitos reservados</p>
+  <p>© 2026 Todos os direitos reservados</p>
+  <p class="rodape-meta"><span>Versão 0.2</span> · <a href="#contato" data-vai="contato">Beta · Enviar sugestão</a></p>
 </footer>
 <script src="vendor/leaflet.js"></script>
 <script src="data/cx.js"></script>
