@@ -1,0 +1,1 @@
+window.__MDC={"n":"https://ntfy.sh","f":"mdc_f_LWlmMsVsUvPHaAv5UzfY6e_-lis4ILLwFeLQKhwK_tg","p":"mdc_p_VRixT6hYPn6-PbETx4GUQqud818-iD88pB9ACXa-Qk4"};
