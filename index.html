@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Malha do Cerrado · Redes LoRa mesh em Goiás e no Brasil</title>
+<meta name="description" content="Comunicação por rádio LoRa, sem internet e sem celular. Vamos conectar Goiás e o Brasil, nó por nó. Mapa dos nós Meshtastic e MeshCore, guia para montar o seu nó e comunidade.">
+<meta property="og:title" content="Malha do Cerrado">
+<meta property="og:description" content="Comunicação por rádio LoRa, sem internet e sem celular. Vamos conectar Goiás e o Brasil, nó por nó.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#14532d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<header class="topo">
+  <div class="marca">
+    <h1 id="titulo">Malha do Cerrado</h1>
+    <p class="sub">Redes LoRa mesh em Goiás e no Brasil</p>
+  </div>
+  <div class="meta-topo">
+    <p class="atualiza" id="atualiza">Carregando…</p>
+    <p class="vendo" id="vendo" hidden></p>
+  </div>
+</header>
+<nav class="abas" role="tablist">
+  <button data-aba="inicio" class="ativa">Início</button>
+  <button data-aba="mapa">Mapa</button>
+  <button data-aba="novidades">Novidades da semana</button>
+  <button data-aba="lacunas">Onde falta nó</button>
+  <button data-aba="cidades">Cidades e estados</button>
+  <button data-aba="online">Quem está online</button>
+  <button data-aba="comece">Comece aqui</button>
+  <button data-aba="sobre">Sobre o projeto</button>
+  <button data-aba="comunidade">Comunidade</button>
+  <button data-aba="contato">Fale conosco</button>
+</nav>
+<main>
+  <section id="aba-inicio" class="aba ativa">
+    <div class="heroi">
+      <h2>Mensagens que chegam onde a internet e o celular não chegam.</h2>
+      <p>Rádios pequenos e baratos, chamados <strong>nós</strong>, repassam mensagens de texto uns dos outros, sem internet e sem operadora. Quanto mais gente liga um nó, mais longe a rede alcança. Estamos reunindo <strong>radioamadores e entusiastas de LoRa</strong> para criar mais nós em <strong>Goiás</strong> e no <strong>Brasil</strong>.</p>
+      <div class="cta">
+        <a class="botao" href="#comece" data-vai="comece">Monte seu nó</a>
+        <a class="botao sec" href="#comunidade" data-vai="comunidade">Entre na comunidade</a>
+        <a class="botao sec" href="#mapa" data-vai="mapa">Veja o mapa</a>
+      </div>
+    </div>
+    <h3 class="tit-sec">A malha hoje (dados reais dos mapas públicos)</h3>
+    <div class="cartoes" id="cartoes-inicio"></div>
+    <p class="nota" id="goias-resumo"></p>
+    <div class="tres">
+      <div class="caixa"><h3>1. Monte seu nó</h3><p>Uma placa LoRa com antena, o firmware certo e um aplicativo no celular. O guia explica o caminho, passo a passo, em português.</p><p><a href="#comece" data-vai="comece">Ir para o guia →</a></p></div>
+      <div class="caixa"><h3>2. Descubra onde ajudar</h3><p>Veja no mapa quem já está na rede e quais cidades de Goiás estão mais longe de qualquer nó conhecido.</p><p><a href="#lacunas" data-vai="lacunas">Onde falta nó →</a></p></div>
+      <div class="caixa"><h3>3. Fale com a comunidade</h3><p>Tire dúvidas, combine configurações com quem é da sua região e ajude quem está começando.</p><p><a href="#comunidade" data-vai="comunidade">Entrar na comunidade →</a></p></div>
+    </div>
+    <p class="nota">Mensagens curtas e posição: é isso que uma rede LoRa mesh faz. Ela não substitui os canais oficiais de emergência (190, 192, 193 e Defesa Civil 199). <a href="#sobre" data-vai="sobre">Leia sobre o projeto.</a></p>
+  </section>
+
+  <section id="aba-mapa" class="aba">
+    <div class="cartoes" id="cartoes"></div>
+    <div class="filtros">
+      <fieldset class="redes"><legend>Redes no mapa</legend>
+        <label class="chk"><input type="checkbox" id="c-mt" checked><span class="b mt"></span> Meshtastic</label>
+        <label class="chk"><input type="checkbox" id="c-mc" checked><span class="b mc"></span> MeshCore</label>
+      </fieldset>
+      <label>Estado <select id="f-uf"><option value="">Todos</option></select></label>
+      <label>Atividade
+        <select id="f-ativ"><option value="todos">Todos os nós</option><option value="24h">Ouvidos nas últimas 24 h</option><option value="1h">Online agora (última 1 h)</option></select>
+      </label>
+      <label>Buscar <input id="f-busca" type="search" placeholder="nome, cidade ou id"></label>
+    </div>
+    <div id="mapa"></div>
+    <p class="legenda"><span class="b mt"></span> Meshtastic (verde) <span class="b mc"></span> MeshCore (roxo) · círculo grande e forte: online na última 1 h · médio: ouvido em 24 h · pequeno e claro: mais antigo</p>
+    <p class="nota">Posições arredondadas (cerca de 1 km) e vindas de mapas públicos. Um nó que não aparece aqui pode existir: só vemos quem reporta aos mapas.</p>
+  </section>
+
+  <section id="aba-novidades" class="aba">
+    <h2>Novidades da semana</h2>
+    <p class="nota" id="nov-info">Carregando…</p>
+    <div class="cartoes" id="nov-cartoes"></div>
+    <h3>Nós novos nos últimos 7 dias</h3>
+    <div id="nov-novos"></div>
+    <h3>Cidades que entraram na malha</h3>
+    <div id="nov-cidades"></div>
+    <h3>Nós que ficaram em silêncio</h3>
+    <p class="nota">Nós ouvidos nos últimos 7 dias, mas não nas últimas 48 h. Pode ser desligamento, falta de energia ou só um mapa que não os ouviu. Não é garantia de que o nó caiu. Goiás aparece primeiro.</p>
+    <div id="nov-quedas"></div>
+    <h3>Cidades mais ativas (nós ouvidos em 24 h)</h3>
+    <div id="nov-topc"></div>
+    <h3>Estados mais ativos (nós ouvidos em 24 h)</h3>
+    <div id="nov-topu"></div>
+    <h3>Nós ouvidos em 24 h, dia a dia</h3>
+    <div id="nov-serie"></div>
+    <p class="nota">Este quadro é gerado automaticamente pelo servidor do projeto a cada 30 minutos.</p>
+  </section>
+
+  <section id="aba-lacunas" class="aba">
+    <h2>Onde falta nó</h2>
+    <div class="aviso">
+      <p><strong>Estimativa simples, não é cobertura de rádio.</strong> Para cada município de Goiás medimos a distância em linha reta até o nó mais próximo que foi ouvido nos últimos <span id="lac-dias">30</span> dias (em qualquer rede e estado). Não consideramos relevo, antenas, altura nem se há linha de visada. Serve só para apontar onde um nó novo teria menos vizinhos por perto.</p>
+    </div>
+    <div class="cartoes" id="lac-cartoes"></div>
+    <div id="mapa-lac"></div>
+    <p class="legenda"><span class="b verde"></span> até <span class="lim1">30</span> km de um nó <span class="b amarelo"></span> de <span class="lim1">30</span> a <span class="lim2">60</span> km <span class="b verm"></span> mais de <span class="lim2">60</span> km · pontos pequenos: nós ativos (verde = Meshtastic, roxo = MeshCore)</p>
+    <h3>Municípios de Goiás mais distantes de um nó</h3>
+    <div id="lac-top"></div>
+    <h3>Saltos longos entre cidades que já têm nó</h3>
+    <p class="nota">Pares de cidades de Goiás com nó, cuja cidade com nó mais próxima fica a mais de <span class="lim2">60</span> km em linha reta. Um nó no meio do caminho pode ajudar a ligar os dois lados, se houver linha de visada.</p>
+    <div id="lac-saltos"></div>
+  </section>
+
+  <section id="aba-cidades" class="aba">
+    <h2>Cidades e estados</h2>
+    <div id="ficha" class="ficha" hidden></div>
+    <div class="filtros">
+      <label>Rede <select id="ci-rede"><option value="todas">Meshtastic e MeshCore</option><option value="meshtastic">Meshtastic</option><option value="meshcore">MeshCore</option></select></label>
+      <label>Estado <select id="ci-uf"><option value="">Todos</option></select></label>
+      <label>Buscar cidade <input id="ci-busca" type="search" placeholder="nome da cidade"></label>
+    </div>
+    <h3>Cidades</h3>
+    <p class="nota" id="ci-resumo"></p>
+    <div class="tabela-wrap"><table id="tab-cidades"><thead><tr><th>Cidade</th><th>UF</th><th class="num">Nós</th><th class="num">Online (1 h)</th><th class="num">24 h</th><th class="num">Meshtastic (online)</th><th class="num">MeshCore (online)</th></tr></thead><tbody></tbody></table></div>
+    <p class="nota">Toque em uma cidade para ver a ficha dela. Só aparecem cidades com ao menos um nó no mapa.</p>
+    <h3>Estados</h3>
+    <div class="tabela-wrap"><table id="tab-estados"><thead><tr><th>UF</th><th class="num">Total</th><th class="num">Online (1 h)</th><th class="num">24 h</th><th class="num">Meshtastic</th><th class="num">MeshCore</th></tr></thead><tbody></tbody></table></div>
+    <p class="nota">Toque em um estado para filtrar o mapa.</p>
+  </section>
+
+  <section id="aba-online" class="aba">
+    <h2>Quem está online</h2>
+    <p>Nós ouvidos na última hora (“online agora”) e nas últimas 24 horas, do contato mais recente para o mais antigo. “Último contato” é quando um mapa público ouviu o nó pela última vez.</p>
+    <div class="filtros"><label>Mostrar <select id="o-janela"><option value="1h">Última 1 hora</option><option value="24h">Últimas 24 horas</option></select></label>
+    <label>Rede <select id="o-rede"><option value="todas">Meshtastic e MeshCore</option><option value="meshtastic">Meshtastic</option><option value="meshcore">MeshCore</option></select></label>
+    <label>Estado <select id="o-uf"><option value="">Todos</option></select></label></div>
+    <p id="o-resumo" class="nota"></p>
+    <div class="tabela-wrap"><table id="tab-online"><thead><tr><th>Nome</th><th>Rede</th><th>Local</th><th>Placa</th><th>Papel</th><th>Último contato</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="aba-comece" class="aba guia">
+    <h2>Comece aqui: monte o seu nó</h2>
+    <p class="nota">Guia em português para quem nunca montou um nó. Baseado no fórum <a href="https://www.meshbrasil.org/" target="_blank" rel="noopener">meshbrasil.org</a> e na documentação oficial. Os detalhes mudam com o tempo: sempre confira as fontes.</p>
+
+    <h3>1. O que é, em linguagem simples</h3>
+    <p>LoRa é uma tecnologia de rádio de baixo consumo e longo alcance. Numa rede <em>mesh</em> (malha), cada rádio pequeno, o <strong>nó</strong>, recebe mensagens e as repassa para os vizinhos. Assim a mensagem pode atravessar vários nós até chegar ao destino, sem internet e sem sinal de celular.</p>
+    <p>Servem para <strong>texto curto, posição e status</strong>. Não servem para voz, fotos ou arquivos grandes, e não substituem os canais oficiais de emergência. O alcance depende de relevo, antena, altura e obstáculos, então não dá para prometer distância.</p>
+
+    <h3>2. Meshtastic ou MeshCore?</h3>
+    <p><strong>Meshtastic</strong> e <strong>MeshCore</strong> são dois firmwares abertos que rodam em rádios LoRa parecidos. O seu rádio usa <em>um ou outro</em>, e as duas redes <strong>não conversam entre si</strong>. Antes de escolher, veja no mapa qual rede existe perto de você: um nó sozinho não forma malha.</p>
+    <p id="comp-dados" class="nota"></p>
+
+    <h3>3. O que comprar (genérico)</h3>
+    <ul>
+      <li>Uma <strong>placa LoRa com antena na versão 915 MHz</strong>. Placas de 868 ou 433 MHz “não servem bem para o Brasil” (fórum meshbrasil.org).</li>
+      <li>Confirme o <strong>modelo e a revisão exatos</strong> antes de gravar o firmware: há placas com nome parecido e versões diferentes.</li>
+      <li>Um <strong>cabo USB que transmita dados</strong>. Cabo só de carga é a causa mais comum de “o computador não reconhece a placa”.</li>
+      <li>Para nó fixo ao ar livre: caixa estanque, fonte de energia (ou bateria e painel solar) e, se possível, um ponto alto.</li>
+      <li><strong>Nunca ligue a placa sem antena</strong>: transmitir sem carga pode danificar o rádio.</li>
+    </ul>
+    <p id="hw-dados" class="nota"></p>
+    <p class="nota">Este site não indica lojas nem recebe comissão. Pesquise preços e vendedores por conta própria.</p>
+
+    <h3>4. Configuração básica (Meshtastic)</h3>
+    <ol>
+      <li>Grave o firmware pelo <a href="https://flasher.meshtastic.org" target="_blank" rel="noopener">flasher oficial</a>, num navegador Chrome ou Edge, escolhendo o modelo exato da placa e a versão estável.</li>
+      <li>Instale o <a href="https://meshtastic.org/downloads/" target="_blank" rel="noopener">aplicativo oficial</a> e pareie por Bluetooth (o PIN costuma aparecer na tela da placa).</li>
+      <li><strong>Defina a região</strong>: sem região o rádio não transmite. Veja o quadro abaixo.</li>
+      <li>Deixe o preset padrão (<code>LONG_FAST</code>) e o canal primário padrão para encontrar a malha local. Canais privados só depois de entender o básico.</li>
+      <li>Dê um nome curto e identificável ao nó e mantenha o papel <strong>Client</strong>.</li>
+      <li>No celular, libere as permissões de localização e de dispositivos próximos, e ignore a otimização de bateria para o app.</li>
+    </ol>
+    <p><strong>MeshCore:</strong> o fórum meshbrasil.org tem um tutorial de Heltec com MeshCore. Segundo ele, o FAQ oficial do MeshCore traz exemplos para Europa, Oceania e EUA, mas não lista uma configuração para o Brasil: use só depois de combinar os parâmetros de rádio com a comunidade local.</p>
+    <p id="mc-dados" class="nota"></p>
+
+    <div class="aviso" id="regiao-caixa">
+      <h3>Região de rádio: em confirmação com a comunidade</h3>
+      <p>Ainda estamos confirmando com a comunidade qual configuração de região é a mais usada em Goiás. <strong>Por enquanto, este site não indica qual região usar.</strong> Rádios em regiões diferentes não se enxergam.</p>
+      <p><strong>Antes de gravar a região, pergunte no grupo da sua cidade ou estado</strong> e confira as regras da Anatel (faixa, potência, homologação). Quando houver confirmação, esta seção será atualizada.</p>
+      <p id="regiao-dados" class="nota"></p>
+    </div>
+
+    <h3>5. Onde instalar</h3>
+    <ul>
+      <li>Altura e linha de visada importam mais que potência: janela, telhado ou ponto alto ajudam bastante.</li>
+      <li>Cabo fino e longo perde muito sinal em 915 MHz: prefira cabo de baixa perda, o mais curto possível, ou deixe o rádio perto da antena.</li>
+      <li>Para sistema solar, meça o consumo real, dimensione a bateria para 2 a 3 dias sem sol e use controlador de carga adequado ao tipo de bateria (lítio carregado errado é risco de incêndio).</li>
+      <li>Quer ajudar a malha crescer? Veja <a href="#lacunas" data-vai="lacunas">onde falta nó</a>.</li>
+    </ul>
+
+    <h3>6. Não achei ninguém. E agora?</h3>
+    <p>Confira nesta ordem: antena e energia; região; mesmo preset e mesmo canal; firmware e app compatíveis; teste com um segundo rádio a poucos metros (pode não haver vizinhos); tente de uma janela, varanda ou ponto alto. Para pedir ajuda, informe a placa, as versões, a cidade, o que já tentou e o trecho do log.</p>
+
+    <h3>7. Boas práticas</h3>
+    <ul>
+      <li><strong>Client é o papel do dia a dia.</strong> Router só para nó fixo, em ponto claramente alto e combinado com a comunidade local; mais repetidores no mesmo lugar pioram a malha.</li>
+      <li>Em nó fixo, desligar GPS e tela economiza bastante energia.</li>
+      <li>Compartilhar a posição do nó em mapas públicos é opcional: quem faz isso torna o local visível para qualquer pessoa. Decida com calma, principalmente se o nó está em casa.</li>
+      <li>Não envie dados pessoais em canal aberto.</li>
+      <li>Em emergência real, acione primeiro 190, 192, 193 e a Defesa Civil (199).</li>
+    </ul>
+
+    <h3>Links úteis</h3>
+    <ul>
+      <li><a href="https://www.meshbrasil.org/" target="_blank" rel="noopener">Fórum Mesh Brasil</a> (tutoriais de Heltec com Meshtastic e com MeshCore, solar, caixa estanque, MQTT, linha de visada)</li>
+      <li><a href="https://meshtastic.org/docs/" target="_blank" rel="noopener">Documentação oficial do Meshtastic</a></li>
+      <li><a href="https://map.meshcore.io" target="_blank" rel="noopener">Mapa oficial do MeshCore</a></li>
+    </ul>
+    <div class="cta"><a class="botao" href="#comunidade" data-vai="comunidade">Dúvidas? Entre na comunidade</a></div>
+  </section>
+
+  <section id="aba-sobre" class="aba guia">
+    <h2>Sobre o projeto</h2>
+    <h3>Missão</h3>
+    <p>A <strong>Malha do Cerrado</strong> quer <strong>unir radioamadores, entusiastas de LoRa e curiosos</strong> para criar mais nós de redes mesh em <strong>Goiás</strong> e no <strong>Brasil</strong>, e manter um mapa e um guia abertos, em português, para quem quer entrar. É um projeto comunitário e voluntário.</p>
+    <h3>Por que isso importa</h3>
+    <ul>
+      <li><strong>Comunicação sem internet e sem celular.</strong> Cada nó repassa mensagens curtas para o próximo, sem depender de operadora, de antena de celular ou de assinatura.</li>
+      <li><strong>Apoio em emergências.</strong> Quando a energia, a internet ou o celular falham, uma malha local pode servir para mensagens curtas e posição entre pessoas que estão no mesmo alcance. É um complemento: não substitui 190, 192, 193 nem a Defesa Civil (199), e só funciona se houver nós no caminho.</li>
+      <li><strong>Zona rural e estrada.</strong> Fazendas, trilhas e trechos onde o sinal de celular costuma ser fraco ou inexistente são onde uma malha comunitária pode fazer mais diferença. O alcance real depende de relevo, antena e linha de visada, e não prometemos distância.</li>
+      <li><strong>Comunidade.</strong> A rede só existe porque pessoas ligam nós. Cada nó novo ajuda os vizinhos, e a troca de experiência entre quem já montou e quem está começando acelera tudo.</li>
+    </ul>
+    <h3>Como participar</h3>
+    <ol>
+      <li><strong>Monte seu nó</strong> seguindo o guia <a href="#comece" data-vai="comece">Comece aqui</a>.</li>
+      <li><strong>Escolha um bom lugar.</strong> Veja <a href="#lacunas" data-vai="lacunas">onde falta nó</a> e instale o seu o mais alto e desobstruído que puder.</li>
+      <li><strong>Entre na <a href="#comunidade" data-vai="comunidade">comunidade</a></strong>, apresente-se e combine a configuração com quem é da sua região.</li>
+      <li><strong>Ajude quem está começando</strong>: responder uma dúvida já é contribuir.</li>
+      <li><strong>Sugira melhorias</strong> pelo <a href="#contato" data-vai="contato">Fale conosco</a>.</li>
+    </ol>
+    <h3>Visão: de Goiás para o Brasil</h3>
+    <p>Começamos por Goiás porque é onde estamos: o mapa mostra quantos nós já existem no estado e quais municípios estão mais longe de qualquer nó. O mapa e o guia já cobrem o Brasil inteiro, e a ideia é que cada região ganhe a sua comunidade e que as malhas locais cresçam até se encontrar. Não temos prazos nem metas fixas: o ritmo é o das pessoas que participam.</p>
+    <h3>O que este site é e não é</h3>
+    <p>Não é um serviço oficial do Meshtastic, do MeshCore nem do fórum Mesh Brasil, e não garante cobertura nem funcionamento da rede perto de você.</p>
+    <h3>De onde vêm os dados</h3>
+    <ul>
+      <li>Nós Meshtastic: mapas públicos <a href="https://meshmap.net" target="_blank" rel="noopener">meshmap.net</a> e <a href="https://mapa.meshbrasil.com" target="_blank" rel="noopener">mapa.meshbrasil.com</a>, coletados periodicamente e filtrados para o Brasil.</li>
+      <li>Nós MeshCore: mapa oficial <a href="https://map.meshcore.io" target="_blank" rel="noopener">map.meshcore.io</a>, filtrados para o Brasil.</li>
+      <li>Municípios de Goiás: lista pública de municípios brasileiros com coordenadas do centro (<a href="https://github.com/kelvins/municipios-brasileiros" target="_blank" rel="noopener">kelvins/municipios-brasileiros</a>).</li>
+    </ul>
+    <h3>Privacidade</h3>
+    <p>A página mostra apenas informações que os próprios nós já divulgam em mapas públicos. As posições são arredondadas (cerca de 1 km), e e-mails, telefones e endereços de rede que apareçam em nomes de nós são removidos. Se quiser que o seu nó deixe de aparecer, escreva pelo <a href="#contato" data-vai="contato">Fale conosco</a>.</p>
+    <h3>Limites</h3>
+    <p>“Online” significa que um mapa público ouviu o nó há pouco tempo, não que a rede esteja funcionando perto de você. Nós sem posição ou que não reportam a esses mapas não aparecem. As áreas de “onde falta nó” são só uma estimativa por distância.</p>
+    <p class="nota">Mapa: © colaboradores do <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. Biblioteca: Leaflet.</p>
+  </section>
+
+  <section id="aba-comunidade" class="aba guia">
+    <h2>Comunidade</h2>
+    <p>Aqui é o ponto de encontro de quem monta, instala e usa redes LoRa mesh em Goiás, e de quem quer começar. Tire dúvidas, combine configurações e ajude a malha a crescer.</p>
+    <div class="caixa zap">
+      <h3>Comunidade no WhatsApp</h3>
+      <p id="zap-texto">O grupo da comunidade ainda não está aberto. Assim que o link estiver disponível, o botão abaixo será ativado.</p>
+      <p><a class="botao desativado" id="zap-botao" href="#comunidade" aria-disabled="true" tabindex="-1">Entrar no grupo (em breve)</a></p>
+    </div>
+    <h3>Regras de convivência</h3>
+    <ul>
+      <li>Foco em rádio e malha: LoRa, Meshtastic, MeshCore, antenas, instalação e comunicação.</li>
+      <li>Sem venda e sem divulgação de produtos ou lojas.</li>
+      <li>Sem política e sem discussões que não ajudem a comunidade.</li>
+      <li>Respeito com todos, especialmente com quem está começando.</li>
+      <li>Não divulgue dados pessoais de outras pessoas nem a localização exata de casas.</li>
+      <li>Em emergência real, acione 190, 192, 193 e a Defesa Civil (199) antes de qualquer grupo.</li>
+    </ul>
+    <h3>Enquanto isso</h3>
+    <ul>
+      <li><a href="https://www.meshbrasil.org/" target="_blank" rel="noopener">Fórum Mesh Brasil</a></li>
+      <li><a href="#contato" data-vai="contato">Fale conosco</a> por este site</li>
+    </ul>
+  </section>
+
+  <section id="aba-contato" class="aba">
+    <h2>Dúvidas, sugestões e comentários</h2>
+    <p>Escreva para a equipe da Malha do Cerrado. A mensagem chega como notificação. Evite enviar senha, endereço exato ou outros dados pessoais.</p>
+    <form id="form-contato" class="formulario" novalidate>
+      <label>Nome (opcional)<input type="text" name="nome" maxlength="80" autocomplete="name"></label>
+      <label>Mensagem
+        <textarea name="mensagem" required maxlength="1000" rows="6" placeholder="Sua dúvida, sugestão ou comentário"></textarea>
+      </label>
+      <div class="hp" aria-hidden="true">
+        <label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      </div>
+      <p class="nota" id="form-status"></p>
+      <button type="submit" id="form-enviar">Enviar</button>
+    </form>
+  </section>
+</main>
+<footer class="rodape">Malha do Cerrado · Projeto comunitário Malha do Cerrado</footer>
+<script src="vendor/leaflet.js"></script>
+<script src="data/cx.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
