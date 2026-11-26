@@ -48,6 +48,7 @@
       </div>
     </div>
     <h3 class="tit-sec">A malha hoje (dados reais dos mapas públicos)</h3>
+    <p class="nota">“Ativos (24 h)” são nós ouvidos nas últimas 24 horas. O mapa mostra também quem respondeu há até 30 dias. Nós com mais de 30 dias sem resposta ficam só na lista “Nós inativos”.</p>
     <div class="cartoes" id="cartoes-inicio"></div>
     <p class="nota" id="goias-resumo"></p>
     <div class="tres">
@@ -62,23 +63,27 @@
     <div class="cartoes" id="cartoes"></div>
     <div class="filtros">
       <fieldset class="redes"><legend>Redes no mapa</legend>
-        <label class="chk"><input type="checkbox" id="c-mt" checked><span class="b mt"></span> Meshtastic</label>
-        <label class="chk"><input type="checkbox" id="c-mc" checked><span class="b mc"></span> MeshCore</label>
+        <label class="chk"><input type="checkbox" id="c-mt" checked><span class="fmt circulo"></span> Meshtastic</label>
+        <label class="chk"><input type="checkbox" id="c-mc" checked><span class="fmt quadrado"></span> MeshCore</label>
       </fieldset>
       <label>Estado <select id="f-uf"><option value="">Todos</option></select></label>
-      <label>Atividade
-        <select id="f-ativ"><option value="todos">Todos os nós</option><option value="24h">Ouvidos nas últimas 24 h</option><option value="1h">Online agora (última 1 h)</option></select>
-      </label>
+      <label class="chk destaque"><input type="checkbox" id="f-ativos"> Só ativos (últimas 24 h)</label>
       <label>Buscar <input id="f-busca" type="search" placeholder="nome, cidade ou id"></label>
     </div>
-    <div id="mapa"></div>
-    <p class="legenda"><span class="b mt"></span> Meshtastic (verde) <span class="b mc"></span> MeshCore (roxo) · círculo grande e forte: online na última 1 h · médio: ouvido em 24 h · pequeno e claro: mais antigo</p>
-    <p class="nota">Posições arredondadas (cerca de 1 km) e vindas de mapas públicos. Um nó que não aparece aqui pode existir: só vemos quem reporta aos mapas.</p>
+    <div id="mapa-principal"></div>
+    <div class="depois-mapa">
+    <p class="nota">A legenda fica no próprio mapa. Posições arredondadas (cerca de 1 km) e vindas de mapas públicos. Um nó que não aparece aqui pode existir: só vemos quem reporta aos mapas.</p>
+    <h3>Nós inativos</h3>
+    <p class="nota">Nós com mais de 30 dias sem resposta. Não entram no mapa. Se o nó voltar a responder, ele aparece de novo no mapa na próxima atualização dos dados.</p>
+    <p class="nota" id="inativos-resumo"></p>
+    <div id="lista-inativos"></div>
+    </div>
   </section>
 
   <section id="aba-novidades" class="aba">
     <h2>Novidades da semana</h2>
     <p class="nota" id="nov-info">Carregando…</p>
+    <p class="nota" id="nov-cores">No mapa, a cor indica a última resposta: <strong>verde</strong>, ativo (até 24 h); <strong>amarelo</strong>, sem contato recente (24–72 h); <strong>vermelho</strong>, inativo (3–30 dias). Nós com mais de 30 dias sem resposta saem do mapa e vão para a lista “Nós inativos”. Círculo é Meshtastic; quadrado é MeshCore. Cinza é nó sem data.</p>
     <div class="cartoes" id="nov-cartoes"></div>
     <h3>Nós novos nos últimos 7 dias</h3>
     <div id="nov-novos"></div>
@@ -99,11 +104,11 @@
   <section id="aba-lacunas" class="aba">
     <h2>Onde falta nó</h2>
     <div class="aviso">
-      <p><strong>Estimativa simples, não é cobertura de rádio.</strong> Para cada município de Goiás medimos a distância em linha reta até o nó mais próximo que foi ouvido nos últimos <span id="lac-dias">30</span> dias (em qualquer rede e estado). Não consideramos relevo, antenas, altura nem se há linha de visada. Serve só para apontar onde um nó novo teria menos vizinhos por perto.</p>
+      <p><strong>Estimativa simples, não é cobertura de rádio.</strong> Para cada município de Goiás medimos a distância em linha reta até o nó mais próximo <strong>com resposta nos últimos <span id="lac-dias">30</span> dias</strong> (em qualquer rede e estado; nós inativos há mais de 30 dias e nós sem data não entram nesta conta). Não consideramos relevo, antenas, altura nem se há linha de visada. Serve só para apontar onde um nó novo teria menos vizinhos por perto.</p>
     </div>
     <div class="cartoes" id="lac-cartoes"></div>
     <div id="mapa-lac"></div>
-    <p class="legenda"><span class="b verde"></span> até <span class="lim1">30</span> km de um nó <span class="b amarelo"></span> de <span class="lim1">30</span> a <span class="lim2">60</span> km <span class="b verm"></span> mais de <span class="lim2">60</span> km · pontos pequenos: nós ativos (verde = Meshtastic, roxo = MeshCore)</p>
+    <p class="legenda"><span class="b verde"></span> até <span class="lim1">30</span> km de um nó <span class="b amarelo"></span> de <span class="lim1">30</span> a <span class="lim2">60</span> km <span class="b verm"></span> mais de <span class="lim2">60</span> km · pontos pequenos e escuros: nós com resposta nos últimos 30 dias (círculo = Meshtastic, quadrado = MeshCore)</p>
     <h3>Municípios de Goiás mais distantes de um nó</h3>
     <div id="lac-top"></div>
     <h3>Saltos longos entre cidades que já têm nó</h3>
@@ -121,17 +126,17 @@
     </div>
     <h3>Cidades</h3>
     <p class="nota" id="ci-resumo"></p>
-    <div class="tabela-wrap"><table id="tab-cidades"><thead><tr><th>Cidade</th><th>UF</th><th class="num">Nós</th><th class="num">Online (1 h)</th><th class="num">24 h</th><th class="num">Meshtastic (online)</th><th class="num">MeshCore (online)</th></tr></thead><tbody></tbody></table></div>
-    <p class="nota">Toque em uma cidade para ver a ficha dela. Só aparecem cidades com ao menos um nó no mapa.</p>
+    <div class="tabela-wrap"><table id="tab-cidades"><thead><tr><th>Cidade</th><th>UF</th><th class="num">Ativos (24 h)</th><th class="num">No mapa (até 30 dias)</th><th class="num">Inativos (&gt;30 dias)</th><th class="num">Meshtastic ativos</th><th class="num">MeshCore ativos</th></tr></thead><tbody></tbody></table></div>
+    <p class="nota">Toque em uma cidade para ver a ficha dela. “Ativos (24 h)” são nós ouvidos nas últimas 24 horas. “No mapa” inclui também quem respondeu há até 30 dias e os nós sem data. Só entram na tabela cidades com ao menos um nó no mapa ou na lista de inativos.</p>
     <h3>Estados</h3>
-    <div class="tabela-wrap"><table id="tab-estados"><thead><tr><th>UF</th><th class="num">Total</th><th class="num">Online (1 h)</th><th class="num">24 h</th><th class="num">Meshtastic</th><th class="num">MeshCore</th></tr></thead><tbody></tbody></table></div>
+    <div class="tabela-wrap"><table id="tab-estados"><thead><tr><th>UF</th><th class="num">Ativos (24 h)</th><th class="num">No mapa (até 30 dias)</th><th class="num">Inativos (&gt;30 dias)</th><th class="num">Meshtastic (no mapa)</th><th class="num">MeshCore (no mapa)</th></tr></thead><tbody></tbody></table></div>
     <p class="nota">Toque em um estado para filtrar o mapa.</p>
   </section>
 
   <section id="aba-online" class="aba">
     <h2>Quem está online</h2>
-    <p>Nós ouvidos na última hora (“online agora”) e nas últimas 24 horas, do contato mais recente para o mais antigo. “Último contato” é quando um mapa público ouviu o nó pela última vez.</p>
-    <div class="filtros"><label>Mostrar <select id="o-janela"><option value="1h">Última 1 hora</option><option value="24h">Últimas 24 horas</option></select></label>
+    <p>Lista dos nós conforme a última resposta ouvida por um mapa público (não é garantia de que a rede funcione perto de você). O padrão é “Ativos (24 h)”, a mesma faixa verde do mapa.</p>
+    <div class="filtros"><label>Mostrar <select id="o-janela"><option value="24h">Ativos (24 h)</option><option value="72h">Até 72 h (ativo + sem contato recente)</option><option value="1h">Última 1 hora</option></select></label>
     <label>Rede <select id="o-rede"><option value="todas">Meshtastic e MeshCore</option><option value="meshtastic">Meshtastic</option><option value="meshcore">MeshCore</option></select></label>
     <label>Estado <select id="o-uf"><option value="">Todos</option></select></label></div>
     <p id="o-resumo" class="nota"></p>
@@ -240,8 +245,10 @@
     </ul>
     <h3>Privacidade</h3>
     <p>A página mostra apenas informações que os próprios nós já divulgam em mapas públicos. As posições são arredondadas (cerca de 1 km), e e-mails, telefones e endereços de rede que apareçam em nomes de nós são removidos. Se quiser que o seu nó deixe de aparecer, escreva pelo <a href="#contato" data-vai="contato">Fale conosco</a>.</p>
+    <h3>Cores do mapa</h3>
+    <p>A cor indica a última resposta ouvida por um mapa público: <strong>verde</strong>, ativo (até 24 h); <strong>amarelo</strong>, sem contato recente (24–72 h); <strong>vermelho</strong>, inativo (3–30 dias). Nós com mais de 30 dias sem resposta saem do mapa e vão para a lista “Nós inativos”; se voltarem a responder, reaparecem sozinhos. <strong>Cinza</strong> é nó sem data. Círculo é Meshtastic; quadrado é MeshCore.</p>
     <h3>Limites</h3>
-    <p>“Online” significa que um mapa público ouviu o nó há pouco tempo, não que a rede esteja funcionando perto de você. Nós sem posição ou que não reportam a esses mapas não aparecem. As áreas de “onde falta nó” são só uma estimativa por distância.</p>
+    <p>“Ativo” significa que um mapa público ouviu o nó nas últimas 24 horas, não que a rede esteja funcionando perto de você. Nós sem posição ou que não reportam a esses mapas não aparecem. As áreas de “onde falta nó” usam só os nós com resposta nos últimos 30 dias e são uma estimativa por distância, não cobertura de rádio.</p>
     <p class="nota">Mapa: © colaboradores do <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. Biblioteca: Leaflet.</p>
   </section>
 
