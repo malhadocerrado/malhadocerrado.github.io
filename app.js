@@ -281,7 +281,7 @@ function nosParaAlcance(){
   return todos.filter(function(n){return noMapa(n)&&faixa(n)==='ativo'&&redeOn(n.t)&&(!uf||n.uf===uf);});}
 function desenhaAlcance(){camadaAlcance.clearLayers();var cb=$('f-alcance');if(!cb||!cb.checked)return;
   nosParaAlcance().forEach(function(n){
-    L.circle([n.la,n.lo],{radius:RAIO_ALCANCE_M,color:COR.ativo,weight:1,opacity:.35,fillColor:COR.ativo,fillOpacity:.12,interactive:false}).addTo(camadaAlcance);});}
+    L.circle([n.la,n.lo],{radius:RAIO_ALCANCE_M,color:COR.ativo,weight:1,opacity:.55,fillColor:COR.ativo,fillOpacity:.22,interactive:false}).addTo(camadaAlcance);});}
 
 function mostraPertoBox(ok){var b=$('perto-box');if(!b)return;b.hidden=!ok;}
 function msgPerto(t){var m=$('perto-msg');if(!m)return;m.textContent=t||'';}
