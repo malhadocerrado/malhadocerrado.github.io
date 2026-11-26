@@ -61,7 +61,7 @@ var mapa=L.map('mapa-principal',{preferCanvas:true}).setView([-14.5,-52],4);
 mapa.getContainer()._leafletMap=mapa;
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenStreetMap'}).addTo(mapa);
 var camadas={meshtastic:L.layerGroup().addTo(mapa),meshcore:L.layerGroup().addTo(mapa)};
-var camadaAlcance=L.layerGroup().addTo(mapa),camadaEu=L.layerGroup().addTo(mapa);
+var camadaAlcance=L.layerGroup().addTo(mapa),camadaEu=L.layerGroup().addTo(mapa),renderAlcance=null;
 var euLat=null,euLon=null;
 
 var ctrl=L.control({position:(window.matchMedia&&window.matchMedia('(max-width:600px)').matches)?'topright':'bottomleft'});
@@ -279,9 +279,15 @@ function comunidade(){var b=$('zap-botao');
 function nosParaAlcance(){
   var uf=$('f-uf')?$('f-uf').value:'';
   return todos.filter(function(n){return noMapa(n)&&faixa(n)==='ativo'&&redeOn(n.t)&&(!uf||n.uf===uf);});}
-function desenhaAlcance(){camadaAlcance.clearLayers();var cb=$('f-alcance');if(!cb||!cb.checked)return;
+function desenhaAlcance(){
+  camadaAlcance.clearLayers();
+  var cb=$('f-alcance');
+  if(!cb||!cb.checked)return;
+  if(!renderAlcance){renderAlcance=L.svg({padding:1});renderAlcance.addTo(mapa);}
   nosParaAlcance().forEach(function(n){
-    L.circle([n.la,n.lo],{radius:RAIO_ALCANCE_M,color:COR.ativo,weight:1,opacity:.55,fillColor:COR.ativo,fillOpacity:.22,interactive:false}).addTo(camadaAlcance);});}
+    L.circle([n.la,n.lo],{radius:RAIO_ALCANCE_M,color:'#16a34a',weight:2,opacity:.65,fillColor:'#16a34a',fillOpacity:.22,interactive:false,renderer:renderAlcance}).addTo(camadaAlcance);
+  });
+}
 
 function mostraPertoBox(ok){var b=$('perto-box');if(!b)return;b.hidden=!ok;}
 function msgPerto(t){var m=$('perto-msg');if(!m)return;m.textContent=t||'';}
@@ -342,6 +348,7 @@ function tudo(){freqmc();regioes();compara();cartoes();desenha();inicio();online
 ['f-uf'].forEach(function(i){$(i).addEventListener('change',desenha);});
 $('c-mt').addEventListener('change',filtrosRede);$('c-mc').addEventListener('change',filtrosRede);
 $('f-ativos').addEventListener('change',desenha);
+document.addEventListener('change',function(ev){if(ev.target&&ev.target.id==='f-alcance')desenhaAlcance();});
 $('f-busca').addEventListener('input',desenha);
 ['o-janela','o-uf','o-rede'].forEach(function(i){$(i).addEventListener('change',online);});
 ['ci-rede','ci-uf'].forEach(function(i){$(i).addEventListener('change',cidades);});$('ci-busca').addEventListener('input',cidades);
