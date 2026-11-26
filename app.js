@@ -44,7 +44,7 @@ if(L.Canvas){var _upd=L.Canvas.prototype._updateCircle;
     ctx.beginPath();ctx.rect(p.x-r,p.y-r,2*r,2*r);this._fillStroke(ctx,layer);};}
 
 // abas (cada aba tem um endereço: #inicio, #mapa, #novidades, #lacunas, #cidades, #online, #comece, #sobre, #comunidade, #contato)
-var ALIAS={guia:'comece',estados:'cidades'};
+var ALIAS={guia:'comece',estados:'cidades',sugestoes:'contato'};
 var abas=document.querySelectorAll('.abas button');
 function abre(nome){nome=ALIAS[nome]||nome;if(!$('aba-'+nome))nome='inicio';
   abas.forEach(function(b){b.classList.toggle('ativa',b.dataset.aba===nome);});
@@ -270,11 +270,22 @@ function lacunas(){if(!lac){$('lac-cartoes').textContent='Não consegui carregar
   tabela('lac-saltos',[{t:'Cidade A',f:function(x){return x.a;}},{t:'Cidade B (a mais próxima com nó)',f:function(x){return x.b;}},{t:'Distância (km)',num:1,f:function(x){return x.d;}}],lac.saltos||[],'Nenhum salto acima de '+lac.lim_medio+' km entre cidades goianas com nó.');}
 
 // comunidade
-function comunidade(){var b=$('zap-botao');
-  if(zap&&zap.whatsapp){b.href=zap.whatsapp;b.target='_blank';b.rel='noopener';b.textContent='Entrar no grupo do WhatsApp';b.classList.remove('desativado');b.removeAttribute('aria-disabled');b.removeAttribute('tabindex');
+function comunidade(){
+  var links=document.querySelectorAll('.btn-zap');
+  links.forEach(function(b){
+    if(zap&&zap.whatsapp){
+      b.href=zap.whatsapp;b.target='_blank';b.rel='noopener noreferrer';
+      b.textContent='Entrar no grupo do WhatsApp';
+      b.classList.remove('desativado');
+      b.removeAttribute('aria-disabled');b.removeAttribute('tabindex');
+    }else if(b.getAttribute('href')==='#comunidade'||b.classList.contains('desativado')){
+      b.addEventListener('click',function(ev){ev.preventDefault();});
+    }
+  });
+  if(zap&&zap.whatsapp&&$('zap-texto')){
     $('zap-texto').textContent='Entre no grupo para tirar dúvidas e conhecer quem monta nós na sua região. Leia as regras abaixo antes de participar.';
-    b.addEventListener('click',function(ev){ev.stopPropagation();});}
-  else{b.addEventListener('click',function(ev){ev.preventDefault();});}}
+  }
+}
 
 function nosParaAlcance(){
   var uf=$('f-uf')?$('f-uf').value:'';
@@ -386,13 +397,14 @@ function iniciaForm(){var c=cfg(),form=$('form-contato');if(!form)return;
   form.addEventListener('submit',function(ev){ev.preventDefault();
     var st=$('form-status'),btn=$('form-enviar');
     var nome=(form.nome.value||'').trim().slice(0,80);
+    var cidade=(form.cidade&&form.cidade.value||'').trim().slice(0,80);
     var msg=(form.mensagem.value||'').trim().slice(0,1000);
-    if(form.website.value){st.textContent='Mensagem enviada. Obrigado!';form.reset();return;}
+    if((form.website&&form.website.value)||(form._honey&&form._honey.value)){st.textContent='Mensagem enviada. Obrigado!';form.reset();return;}
     if(msg.length<3){st.textContent='Escreva uma mensagem (pelo menos 3 caracteres).';return;}
     if(Date.now()-t0<8000){st.textContent='Aguarde uns segundos e envie de novo.';return;}
     try{var ult=parseInt(localStorage.getItem('mdc_form_ts')||'0',10);if(Date.now()-ult<5*60*1000){st.textContent='Aguarde alguns minutos antes de enviar outra mensagem.';return;}}catch(e){}
     btn.disabled=true;st.textContent='Enviando…';
-    var corpo=(nome?nome+':\n':'')+msg;
+    var corpo=(nome?nome+'\n':'')+(cidade?'Cidade: '+cidade+'\n':'')+msg;
     ntfy(c.f,{method:'POST',headers:{'Title':'Comentário · Malha do Cerrado','Priority':'default','Tags':'mailbox_with_mail'},body:corpo})
       .then(function(r){if(!r.ok)throw new Error('falha');try{localStorage.setItem('mdc_form_ts',String(Date.now()));}catch(e){}
         st.textContent='Mensagem enviada. Obrigado!';form.reset();})
