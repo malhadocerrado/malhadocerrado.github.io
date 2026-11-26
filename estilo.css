@@ -99,7 +99,7 @@ label.chk.destaque{background:#fff;border:1px solid var(--bd);border-radius:8px;
   #aba-mapa fieldset.redes,#aba-mapa .chk.destaque{grid-column:1/-1;width:auto}
   #aba-mapa .filtros label{min-width:0;width:auto}
   #aba-mapa .filtros select,#aba-mapa .filtros input[type=search]{min-width:0;width:100%}
-  fieldset.redes{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;padding:4px 8px}
+  fieldset.redes{display:grid;grid-template-columns:1fr;gap:2px 8px;padding:4px 8px}
   fieldset.redes legend{grid-column:1/-1}
   #aba-mapa #mapa-principal{order:2;height:calc(100dvh - 390px);min-height:300px}
   #aba-mapa #cartoes{order:3;margin-top:10px;grid-template-columns:repeat(3,1fr);gap:6px}
