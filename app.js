@@ -23,6 +23,13 @@ function horaBR(ep){
 function textoUltima(v){if(!v)return 'Última resposta: sem data';return 'Última resposta: '+horaBR(v)+' ('+rel(v)+')';}
 function dd(ep){if(!ep)return '';return new Date(ep*1000).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit'});}
 function local(n){return [n.m,n.uf].filter(Boolean).join(' - ');}
+var RAIO_ALCANCE_M=3000; // estimativa única e conservadora (sem dado de altura da antena)
+function km(a,b,c,d){var p=Math.PI/180,x=Math.sin((c-a)*p/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2;return 12742*Math.asin(Math.sqrt(x));}
+function direcao(a,b,c,d){var y=Math.sin((d-b)*Math.PI/180)*Math.cos(c*Math.PI/180);
+  var x=Math.cos(a*Math.PI/180)*Math.sin(c*Math.PI/180)-Math.sin(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.cos((d-b)*Math.PI/180);
+  var nomes=['norte','nordeste','leste','sudeste','sul','sudoeste','oeste','noroeste'];
+  return nomes[Math.round(((Math.atan2(y,x)*180/Math.PI)+360)%360/45)%8];}
+function fmtKm(v){if(v<1)return v<0.15?'bem perto':(Math.round(v*10)/10).toString().replace('.',',')+' km';return Math.round(v)+' km';}
 function nz(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
 function bandas(lst){var r={tot:lst.length,ativo:0,recente:0,inativo:0,sem:0,fora:0,mapa:0};
   lst.forEach(function(n){r[faixa(n)]++;});r.mapa=r.ativo+r.recente+r.inativo+r.sem;return r;}
@@ -53,6 +60,8 @@ document.addEventListener('click',function(ev){var a=ev.target.closest&&ev.targe
 var mapa=L.map('mapa-principal',{preferCanvas:true}).setView([-14.5,-52],4);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenStreetMap'}).addTo(mapa);
 var camadas={meshtastic:L.layerGroup().addTo(mapa),meshcore:L.layerGroup().addTo(mapa)};
+var camadaAlcance=L.layerGroup().addTo(mapa),camadaEu=L.layerGroup().addTo(mapa);
+var euLat=null,euLon=null;
 
 var ctrl=L.control({position:(window.matchMedia&&window.matchMedia('(max-width:600px)').matches)?'topright':'bottomleft'});
 ctrl.onAdd=function(){var d=L.DomUtil.create('div','legenda-mapa');
@@ -63,7 +72,11 @@ ctrl.onAdd=function(){var d=L.DomUtil.create('div','legenda-mapa');
     '<div class="lin"><span class="pt c sem"></span> Sem data</div>'+
     '<div class="sep"></div><h4>Rede</h4>'+
     '<div class="lin"><span class="pt c escuro"></span> Círculo: Meshtastic</div>'+
-    '<div class="lin"><span class="pt q escuro"></span> Quadrado: MeshCore</div>';
+    '<div class="lin"><span class="pt q escuro"></span> Quadrado: MeshCore</div>'+
+    '<label class="alcance"><input type="checkbox" id="f-alcance"> Alcance provável (3 km)</label>'+
+    '<p class="mini">Estimativa conservadora e única, porque não temos a altura da antena. O alcance real depende de relevo, altura e obstáculos.</p>';
+  var cb=d.querySelector('#f-alcance');
+  if(cb) cb.addEventListener('change',desenhaAlcance);
   L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);return d;};
 ctrl.addTo(mapa);
 
@@ -98,7 +111,7 @@ function filtrados(){
 function desenha(){camadas.meshtastic.clearLayers();camadas.meshcore.clearLayers();var lst=filtrados();
   lst.forEach(function(n){marcador(n).addTo(camadas[n.t]);});
   $('f-busca').title=lst.length+' nós no mapa';
-  cartoes();inativos();}
+  cartoes();inativos();desenhaAlcance();if(euLat!=null)atualizaPerto();}
 function filtrosRede(){desenha();}
 
 function card(c,v,t){var x=el('div',null,'cartao');x.appendChild(el('b',String(v)));x.appendChild(el('span',t));c.appendChild(x);}
@@ -262,7 +275,68 @@ function comunidade(){var b=$('zap-botao');
     b.addEventListener('click',function(ev){ev.stopPropagation();});}
   else{b.addEventListener('click',function(ev){ev.preventDefault();});}}
 
-function tudo(){freqmc();regioes();compara();cartoes();desenha();inicio();online();estados();cidades();novidades();lacunas();comunidade();}
+function nosParaAlcance(){
+  var uf=$('f-uf')?$('f-uf').value:'';
+  return todos.filter(function(n){return noMapa(n)&&faixa(n)==='ativo'&&redeOn(n.t)&&(!uf||n.uf===uf);});}
+function desenhaAlcance(){camadaAlcance.clearLayers();var cb=$('f-alcance');if(!cb||!cb.checked)return;
+  nosParaAlcance().forEach(function(n){
+    L.circle([n.la,n.lo],{radius:RAIO_ALCANCE_M,color:COR.ativo,weight:1,opacity:.35,fillColor:COR.ativo,fillOpacity:.12,interactive:false}).addTo(camadaAlcance);});}
+
+function mostraPertoBox(ok){var b=$('perto-box');if(!b)return;b.hidden=!ok;}
+function msgPerto(t){var m=$('perto-msg');if(!m)return;m.textContent=t||'';}
+function desenhaEu(){camadaEu.clearLayers();if(euLat==null)return;
+  var ic=L.divIcon({className:'eu-icon',html:'<div class="eu-aqui"></div><div class="eu-rotulo">Você está aqui (aproximado)</div>',iconSize:[200,28],iconAnchor:[8,14],popupAnchor:[0,-12]});
+  L.marker([euLat,euLon],{icon:ic,zIndexOffset:1000}).bindPopup('Você está aqui (posição aproximada). Esta informação fica só neste aparelho.').addTo(camadaEu);}
+function candidatosPerto(){
+  return todos.filter(function(n){return noMapa(n)&&redeOn(n.t);});}
+function cincoProximos(lat,lon){
+  var cand=candidatosPerto().map(function(n){return {n:n,km:km(lat,lon,n.la,n.lo)};});
+  var verdes=cand.filter(function(x){return faixa(x.n)==='ativo';}).sort(function(a,b){return a.km-b.km;});
+  var outros=cand.filter(function(x){return faixa(x.n)!=='ativo';}).sort(function(a,b){return a.km-b.km;});
+  return verdes.concat(outros).slice(0,5);}
+function atualizaPerto(){
+  if(euLat==null)return;
+  desenhaEu();
+  var lst=cincoProximos(euLat,euLon);
+  var ol=$('perto-lista');if(!ol)return;ol.textContent='';
+  if(!lst.length){msgPerto('Não achei no mapa nenhum nó com resposta nos últimos 30 dias.');mostraPertoBox(true);return;}
+  msgPerto('Os 5 nós mais próximos no mapa (até 30 dias), com prioridade para os ativos (verde). Distâncias são aproximadas (as posições dos nós já vêm arredondadas).');
+  lst.forEach(function(x){var n=x.n,f=faixa(n),li=el('li');
+    var kmTxt=fmtKm(x.km),dir=direcao(euLat,euLon,n.la,n.lo);
+    var a=el('div',null,'p-km');a.appendChild(el('span',null,'pt c '+f)).className='pt c '+f;a.appendChild(document.createTextNode(' '+kmTxt));
+    var b=el('div');b.appendChild(el('div',n.n,'p-nome'));
+    b.appendChild(el('div',kmTxt+' a '+dir+' · '+ROTULO[f]+' · '+rede(n)+(local(n)?' · '+local(n):''),'p-det'));
+    li.appendChild(a);li.appendChild(b);
+    li.tabIndex=0;
+    li.addEventListener('click',function(){mapa.setView([n.la,n.lo],Math.max(mapa.getZoom(),11));L.popup({maxWidth:280}).setLatLng([n.la,n.lo]).setContent(popup(n)).openOn(mapa);});
+    li.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();li.click();}});
+    ol.appendChild(li);});
+  mostraPertoBox(true);}
+function erroPerto(e){
+  var t='Não consegui obter sua posição agora. Tente de novo em instantes.';
+  if(!e||e.code===1)t='Não consegui usar a localização. Se quiser, permita o acesso nas configurações do navegador e toque de novo em Perto de mim.';
+  else if(e.code===2)t='Sua posição não ficou disponível agora. Tente de novo em instantes, de preferência com o GPS ligado.';
+  else if(e.code===3)t='A busca da sua posição demorou demais. Tente de novo.';
+  msgPerto(t);mostraPertoBox(true);$('perto-lista').textContent='';}
+function pedirPerto(){
+  var btn=$('btn-perto');
+  if(!navigator.geolocation){msgPerto('Este navegador não informa localização.');mostraPertoBox(true);return;}
+  if(btn){btn.disabled=true;btn.textContent='Buscando sua posição…';}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    // A posição fica só nestas variáveis, neste aparelho. Não vai a servidor, log nem armazenamento.
+    euLat=pos.coords.latitude;euLon=pos.coords.longitude;
+    atualizaPerto();
+    var pts=[[euLat,euLon]].concat(cincoProximos(euLat,euLon).map(function(x){return [x.n.la,x.n.lo];}));
+    try{mapa.fitBounds(pts,{maxZoom:11,padding:[40,40]});}catch(e){mapa.setView([euLat,euLon],10);}
+    if(btn){btn.disabled=false;btn.textContent='Perto de mim';}
+  },function(err){
+    if(btn){btn.disabled=false;btn.textContent='Perto de mim';}
+    erroPerto(err);
+  },{enableHighAccuracy:false,timeout:15000,maximumAge:0});}
+
+function tudo(){freqmc();regioes();compara();cartoes();desenha();inicio();online();estados();cidades();novidades();lacunas();comunidade();
+  var bp=$('btn-perto');if(bp)bp.addEventListener('click',pedirPerto);}
+
 
 ['f-uf'].forEach(function(i){$(i).addEventListener('change',desenha);});
 $('c-mt').addEventListener('change',filtrosRede);$('c-mc').addEventListener('change',filtrosRede);
