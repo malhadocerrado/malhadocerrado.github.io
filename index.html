@@ -69,8 +69,19 @@
       <label>Estado <select id="f-uf"><option value="">Todos</option></select></label>
       <label class="chk destaque"><input type="checkbox" id="f-ativos"> Só ativos (últimas 24 h)</label>
       <label>Buscar <input id="f-busca" type="search" placeholder="nome, cidade ou id"></label>
+      <div class="perto-acoes">
+        <button type="button" id="btn-perto" class="botao">Perto de mim</button>
+        <p class="nota aviso-loc">Sua localização é usada só neste aparelho e não é enviada a ninguém.</p>
+      </div>
     </div>
-    <div id="mapa-principal"></div>
+    <div class="mapa-wrap">
+      <div id="mapa-principal"></div>
+      <div id="perto-box" class="perto-box" hidden>
+        <h3>Perto de você</h3>
+        <p class="nota" id="perto-msg"></p>
+        <ol id="perto-lista"></ol>
+      </div>
+    </div>
     <div class="depois-mapa">
     <p class="nota">A legenda fica no próprio mapa. Posições arredondadas (cerca de 1 km) e vindas de mapas públicos. Um nó que não aparece aqui pode existir: só vemos quem reporta aos mapas.</p>
     <h3>Nós inativos</h3>
@@ -84,6 +95,7 @@
     <h2>Novidades da semana</h2>
     <p class="nota" id="nov-info">Carregando…</p>
     <p class="nota" id="nov-cores">No mapa, a cor indica a última resposta: <strong>verde</strong>, ativo (até 24 h); <strong>amarelo</strong>, sem contato recente (24–72 h); <strong>vermelho</strong>, inativo (3–30 dias). Nós com mais de 30 dias sem resposta saem do mapa e vão para a lista “Nós inativos”. Círculo é Meshtastic; quadrado é MeshCore. Cinza é nó sem data.</p>
+    <p class="nota">Novidade no mapa: o botão <strong>Perto de mim</strong> mostra os nós mais próximos de você (a localização fica só no seu aparelho e não é enviada a ninguém). O interruptor <strong>Alcance provável</strong> desenha um círculo de 3 km em volta de cada nó ativo — é uma estimativa conservadora, sem dado de altura da antena; o alcance real depende de relevo, altura e obstáculos.</p>
     <div class="cartoes" id="nov-cartoes"></div>
     <h3>Nós novos nos últimos 7 dias</h3>
     <div id="nov-novos"></div>
