@@ -102,7 +102,7 @@ label.chk.destaque{background:#fff;border:1px solid var(--bd);border-radius:8px;
   fieldset.redes{display:grid;grid-template-columns:1fr;gap:2px 8px;padding:4px 8px}
   fieldset.redes legend{grid-column:1/-1}
   #aba-mapa .mapa-wrap{order:2}
-  #aba-mapa #mapa-principal{height:calc(100dvh - 390px);min-height:300px}
+  #aba-mapa #mapa-principal{height:calc(100dvh - 520px);min-height:240px}
   #aba-mapa #cartoes{order:3;margin-top:10px;grid-template-columns:repeat(3,1fr);gap:6px}
   #aba-mapa #cartoes .cartao{padding:6px 8px}
   #aba-mapa #cartoes .cartao b{font-size:1.15rem}
@@ -133,7 +133,8 @@ label.chk.destaque{background:#fff;border:1px solid var(--bd);border-radius:8px;
 @media(max-width:600px){
   .perto-acoes{grid-column:1/-1}
   .perto-acoes .botao{width:100%;text-align:center}
-  .perto-box{left:8px;right:8px;width:auto;bottom:8px;max-height:40%}
+  .perto-box{position:static;left:auto;right:auto;width:auto;max-height:none;margin-top:8px;box-shadow:none;border:1px solid var(--bd)}
+  .legenda-mapa .mini{font-size:10px}
 }
 
 .pt{display:inline-block;width:11px;height:11px;border:1px solid #fff;box-shadow:0 0 0 1px #0004;vertical-align:middle;background:#9ca3af}
