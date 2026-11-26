@@ -64,22 +64,22 @@ var camadas={meshtastic:L.layerGroup().addTo(mapa),meshcore:L.layerGroup().addTo
 var camadaAlcance=L.layerGroup().addTo(mapa),camadaEu=L.layerGroup().addTo(mapa),renderAlcance=null;
 var euLat=null,euLon=null;
 
-var ctrl=L.control({position:(window.matchMedia&&window.matchMedia('(max-width:600px)').matches)?'topright':'bottomleft'});
-ctrl.onAdd=function(){var d=L.DomUtil.create('div','legenda-mapa');
-  d.innerHTML='<h4>Última resposta</h4>'+
-    '<div class="lin"><span class="pt c ativo"></span> Ativo (até 24 h)</div>'+
-    '<div class="lin"><span class="pt c recente"></span> Sem contato recente (24–72 h)</div>'+
-    '<div class="lin"><span class="pt c inativo"></span> Inativo (3–30 dias)</div>'+
-    '<div class="lin"><span class="pt c sem"></span> Sem data</div>'+
-    '<div class="sep"></div><h4>Rede</h4>'+
-    '<div class="lin"><span class="pt c escuro"></span> Círculo: Meshtastic</div>'+
-    '<div class="lin"><span class="pt q escuro"></span> Quadrado: MeshCore</div>'+
-    '<label class="alcance"><input type="checkbox" id="f-alcance"> Alcance provável (3 km)</label>'+
-    '<p class="mini">Estimativa conservadora e única, porque não temos a altura da antena. O alcance real depende de relevo, altura e obstáculos.</p>';
-  var cb=d.querySelector('#f-alcance');
-  if(cb) cb.addEventListener('change',desenhaAlcance);
-  L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);return d;};
-ctrl.addTo(mapa);
+function iniciaLegenda(){
+  var btn=$('btn-legenda'), painel=$('painel-legenda'), fecha=painel&&painel.querySelector('.btn-fecha-legenda');
+  if(!btn||!painel)return;
+  function setAberto(on){
+    painel.hidden=!on;
+    btn.setAttribute('aria-expanded',on?'true':'false');
+    btn.classList.toggle('aberta',on);
+  }
+  setAberto(window.matchMedia('(min-width:768px)').matches);
+  btn.addEventListener('click',function(){setAberto(painel.hidden);});
+  if(fecha) fecha.addEventListener('click',function(){setAberto(false);});
+  L.DomEvent.disableClickPropagation(painel);
+  L.DomEvent.disableScrollPropagation(painel);
+  L.DomEvent.disableClickPropagation(btn);
+}
+iniciaLegenda();
 
 function popup(n){var d=el('div');d.appendChild(el('strong',n.n));
   function lin(r,v){if(v){d.appendChild(el('br'));d.appendChild(document.createTextNode(r?r+': '+v:v));}}
