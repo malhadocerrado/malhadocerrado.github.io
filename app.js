@@ -58,6 +58,7 @@ document.addEventListener('click',function(ev){var a=ev.target.closest&&ev.targe
 
 // mapa principal: uma camada por rede, com liga/desliga
 var mapa=L.map('mapa-principal',{preferCanvas:true}).setView([-14.5,-52],4);
+mapa.getContainer()._leafletMap=mapa;
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenStreetMap'}).addTo(mapa);
 var camadas={meshtastic:L.layerGroup().addTo(mapa),meshcore:L.layerGroup().addTo(mapa)};
 var camadaAlcance=L.layerGroup().addTo(mapa),camadaEu=L.layerGroup().addTo(mapa);
