@@ -1,16 +1,17 @@
 :root{--verde:#14532d;--verde2:#166534;--ouro:#fbbf24;--bg:#f6f7f4;--tx:#1b1f1c;--mut:#5b665f;--bd:#d9ded9}
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
-.topo{background:linear-gradient(115deg,#0b3320 0%,#14532d 42%,#1f5c2c 68%,#3d5a1a 88%,#5c4e16 100%);color:#fff;padding:16px 20px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.topo{background:linear-gradient(115deg,#0b3320 0%,#14532d 42%,#1f5c2c 68%,#3d5a1a 88%,#5c4e16 100%);color:#fff;padding:12px 20px;display:flex;align-items:center}
 .marca{display:flex;align-items:center;gap:12px;min-width:0}
-.logo-antena{flex:0 0 auto;width:48px;height:48px;color:#fff;filter:drop-shadow(0 1px 2px #0004)}
+.logo-antena{flex:0 0 auto;width:44px;height:44px;color:#fff;filter:drop-shadow(0 1px 2px #0004)}
 .marca-texto{min-width:0}
-.topo h1{margin:0;font-size:1.7rem;letter-spacing:.01em;line-height:1.15}
-.sub{margin:3px 0 0;opacity:.9;font-size:.92rem}
-.atualiza{margin:0;font-size:.8rem;opacity:.9}
-.num-versao{margin:2px 0 0;font-size:.78rem;opacity:.9}
-.selo-beta{display:inline-block;margin-top:6px;max-width:22rem;color:#14532d;background:var(--ouro);text-decoration:none;font-size:.78rem;font-weight:600;line-height:1.35;padding:6px 12px;border-radius:999px;box-shadow:0 1px 2px #0003}
-.selo-beta:hover,.selo-beta:focus{background:#fde68a;outline:2px solid #fff;outline-offset:2px}
+.topo h1{margin:0;font-size:1.55rem;letter-spacing:.01em;line-height:1.15}
+.sub{margin:2px 0 0;opacity:.9;font-size:.9rem}
+.barra-meta{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;justify-content:space-between;padding:6px 20px;background:#eef3ee;color:var(--mut);font-size:.78rem}
+.barra-meta .atualiza,.barra-meta .vendo{margin:0}
+.rodape-meta{margin-top:10px;font-size:.75rem;color:var(--mut)}
+.rodape-meta a{color:var(--mut);text-decoration:underline;text-underline-offset:2px}
+.rodape-meta a:hover,.rodape-meta a:focus{color:var(--verde)}
 .abas{display:flex;overflow-x:auto;background:var(--verde2);position:sticky;top:0;z-index:1000}
 .abas button{flex:0 0 auto;background:none;border:0;color:#e7efe9;padding:12px 16px;font:inherit;cursor:pointer;border-bottom:3px solid transparent}
 .abas button.ativa{color:#fff;border-bottom-color:var(--ouro);font-weight:600}
@@ -39,7 +40,6 @@ code{background:#e9eee9;padding:1px 5px;border-radius:4px}
 a{color:#0b6b3a}
 .rodape{text-align:center;color:var(--mut);font-size:.8rem;padding:24px 16px 28px}.rodape p{margin:0 0 4px}
 
-.meta-topo{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .vendo{margin:0;font-size:.8rem;opacity:.85}
 .formulario{display:flex;flex-direction:column;gap:12px;max-width:520px;background:#fff;border:1px solid var(--bd);border-radius:10px;padding:16px}
 .formulario label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mut)}
@@ -82,57 +82,54 @@ label.chk input{width:auto;padding:0;margin:0}
 .fmt.circulo{border-radius:50%}
 .fmt.quadrado{border-radius:1px}
 label.chk.destaque{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:6px 10px;font-weight:600}
-.legenda-mapa{background:#fff;color:#1b1f1c;padding:8px 10px;border-radius:8px;box-shadow:0 1px 6px #0003;font:12px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;max-width:240px}
-.legenda-mapa h4{margin:0 0 4px;font-size:12px}
-.legenda-mapa .lin{display:flex;align-items:center;gap:6px;margin:2px 0}
-.legenda-mapa .sep{margin-top:6px;padding-top:5px;border-top:1px solid var(--bd)}
-.legenda-mapa .pt{width:11px;height:11px;border:1px solid #fff;box-shadow:0 0 0 1px #0004;flex:0 0 auto;background:#16a34a}
-.legenda-mapa .pt.c{border-radius:50%}
-.legenda-mapa .pt.q{border-radius:1px}
-.legenda-mapa .pt.ativo{background:#16a34a}
-.legenda-mapa .pt.recente{background:#f59e0b}
-.legenda-mapa .pt.inativo{background:#dc2626}
-.legenda-mapa .pt.sem{background:#9ca3af}
-.legenda-mapa .pt.escuro{background:#1b1f1c}
 #lista-inativos{margin-bottom:12px}
 @media(max-width:600px){
-  .legenda-mapa{font-size:11px;padding:6px 8px;max-width:min(230px,58vw);line-height:1.3}
-  #mapa-principal{min-height:420px}
+    #mapa-principal{min-height:420px}
 }
 
-#mapa-principal .leaflet-bottom.leaflet-left{margin:0 0 32px 12px}
-.legenda-mapa{padding:7px 9px 8px}
 
 @media(max-width:600px){
-  .topo{padding:12px;gap:10px}
+  .topo{padding:10px 12px}
   .topo h1{font-size:1.28rem}
-  .logo-antena{width:40px;height:40px}
-  .sub{font-size:.85rem}
-  .meta-topo{align-items:flex-start;text-align:left;width:100%}
-  .selo-beta{max-width:100%}
+  .logo-antena{width:36px;height:36px}
+  .sub{font-size:.82rem}
+  .barra-meta{padding:6px 12px}
   #aba-mapa.ativa{display:flex;flex-direction:column}
-  #aba-mapa .filtros{order:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
+  #aba-mapa .mapa-bloco{order:1}
+  #aba-mapa .filtros{order:2;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
   #aba-mapa fieldset.redes,#aba-mapa .chk.destaque{grid-column:1/-1;width:auto}
   #aba-mapa .filtros label{min-width:0;width:auto}
   #aba-mapa .filtros select,#aba-mapa .filtros input[type=search]{min-width:0;width:100%}
   fieldset.redes{display:grid;grid-template-columns:1fr;gap:2px 8px;padding:4px 8px}
   fieldset.redes legend{grid-column:1/-1}
-  #aba-mapa .mapa-wrap{order:2}
-  #aba-mapa #mapa-principal{height:calc(100dvh - 520px);min-height:240px}
+  #aba-mapa #mapa-principal{height:calc(100dvh - 400px);min-height:220px}
   #aba-mapa #cartoes{order:3;margin-top:10px;grid-template-columns:repeat(3,1fr);gap:6px}
   #aba-mapa #cartoes .cartao{padding:6px 8px}
   #aba-mapa #cartoes .cartao b{font-size:1.15rem}
   #aba-mapa #cartoes .cartao span{font-size:.68rem;line-height:1.2}
   #aba-mapa .depois-mapa{order:4}
-  .legenda-mapa{max-width:min(220px,70vw);font-size:10.5px}
-}
+  }
 
-/* Perto de mim e alcance provável */
-.perto-acoes{display:flex;flex-direction:column;gap:4px;justify-content:flex-end}
-.perto-acoes .botao{align-self:flex-start;padding:10px 16px;min-height:44px}
-.aviso-loc{margin:0;max-width:22rem}
+/* Perto de mim, alcance e legenda (não cobrem os nós) */
+.mapa-bloco{position:relative}
 .mapa-wrap{position:relative}
-.perto-box{position:absolute;right:10px;bottom:10px;z-index:700;width:min(340px,92%);max-height:46%;overflow:auto;background:#fff;color:var(--tx);border-radius:10px;box-shadow:0 2px 10px #0003;padding:8px 12px 10px}
+.mapa-ferramentas{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin-top:8px}
+.mapa-barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1 1 auto}
+.btn-legenda,.mapa-barra .botao,.alcance-barra{min-height:40px;padding:8px 12px;border-radius:8px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+.btn-legenda{background:#fff;color:var(--tx);border:1px solid var(--bd);box-shadow:0 1px 3px #0001}
+.btn-legenda[aria-expanded="true"]{background:#14532d;color:#fff;border-color:#14532d}
+.alcance-barra{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--bd);color:var(--tx)}
+.alcance-barra input{margin:0}
+.aviso-loc{margin:6px 0 0;max-width:36rem}
+.perto-box{position:static;width:auto;max-height:none;margin-top:8px;overflow:auto;background:#fff;color:var(--tx);border-radius:10px;border:1px solid var(--bd);box-shadow:none;padding:8px 12px 10px}
+.painel-legenda{background:#fff;color:#1b1f1c;padding:8px 10px;border-radius:8px;border:1px solid var(--bd);box-shadow:0 1px 6px #0002;font:12px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;max-width:260px}
+.painel-legenda-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 4px}
+.painel-legenda-cab h4{margin:0}
+.btn-fecha-legenda{background:none;border:0;font-size:1.3rem;line-height:1;cursor:pointer;color:var(--mut);padding:0 4px}
+.painel-legenda h4{margin:0 0 4px;font-size:12px}
+.painel-legenda .lin{display:flex;align-items:center;gap:6px;margin:2px 0}
+.painel-legenda .sep{margin-top:6px;padding-top:5px;border-top:1px solid var(--bd)}
+.painel-legenda .mini{margin:8px 0 0;font-weight:400;font-size:10.5px;color:var(--mut);line-height:1.3}
 .perto-box h3{margin:2px 0 4px;font-size:1rem;color:var(--verde)}
 .perto-box ol{margin:4px 0 0;padding:0;list-style:none}
 .perto-box li{display:flex;gap:8px;align-items:flex-start;padding:8px 4px;border-top:1px solid var(--bd);cursor:pointer}
@@ -143,15 +140,20 @@ label.chk.destaque{background:#fff;border:1px solid var(--bd);border-radius:8px;
 .perto-box .p-det{font-size:.8rem;color:var(--mut)}
 .eu-aqui{background:#2563eb;border:2px solid #fff;border-radius:50%;width:16px;height:16px;box-shadow:0 0 0 6px #2563eb44,0 1px 4px #0004}
 .eu-rotulo{background:#1d4ed8;color:#fff;font:11px/1.2 system-ui,sans-serif;padding:3px 6px;border-radius:6px;white-space:nowrap;box-shadow:0 1px 3px #0004}
-.legenda-mapa .alcance{margin-top:6px;padding-top:6px;border-top:1px solid var(--bd);display:flex;align-items:flex-start;gap:6px;font-weight:600;cursor:pointer}
-.legenda-mapa .alcance input{margin-top:2px;flex:0 0 auto}
-.legenda-mapa .mini{margin:4px 0 0;font-weight:400;font-size:10.5px;color:var(--mut);line-height:1.3}
-@media(max-width:600px){
-  .perto-acoes{grid-column:1/-1}
-  .perto-acoes .botao{width:100%;text-align:center}
-  .perto-box{position:static;left:auto;right:auto;width:auto;max-height:none;margin-top:8px;box-shadow:none;border:1px solid var(--bd)}
-  .legenda-mapa .mini{font-size:10px}
+@media(max-width:767px){
+  .mapa-ui{display:contents}
+  .btn-legenda{order:0}
+  .mapa-barra{order:1;flex:1 1 auto}
+  .painel-legenda{order:2;flex:1 1 100%;max-width:none;margin:0}
+  .mapa-barra .botao{flex:1 1 auto;text-align:center}
+  .painel-legenda .mini{font-size:10px}
 }
+@media(min-width:768px){
+  .mapa-ui{position:absolute;top:10px;right:10px;z-index:600;display:flex;flex-direction:column;align-items:flex-end;max-width:min(260px,42%)}
+  .painel-legenda{margin-top:6px;width:min(260px,42vw)}
+  .mapa-barra .botao{min-width:10rem}
+}
+
 
 .pt{display:inline-block;width:11px;height:11px;border:1px solid #fff;box-shadow:0 0 0 1px #0004;vertical-align:middle;background:#9ca3af}
 .pt.c{border-radius:50%}
