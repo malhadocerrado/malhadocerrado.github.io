@@ -366,7 +366,7 @@ $('f-busca').addEventListener('input',desenha);
 
 function carrega(url){return fetch(url+(url.indexOf('?')>=0?'&':'?')+'t='+Math.floor(Date.now()/60000)).then(function(r){if(!r.ok)throw new Error(url);return r.json();});}
 function opc(url){return carrega(url).catch(function(){return null;});}
-Promise.all([carrega('data/nos_meshtastic.json?v=9f1f083be4'),carrega('data/nos_meshcore.json?v=bb83d2caed').catch(function(){return {nos:[],disponivel:false};}),opc('data/lacunas.json?v=41a4f4c47b'),opc('data/novidades.json?v=e8118e2d62'),opc('data/comunidade.json?v=75e274a13f')])
+Promise.all([carrega('data/nos_meshtastic.json?v=2a34764adc'),carrega('data/nos_meshcore.json?v=6103f853ea').catch(function(){return {nos:[],disponivel:false};}),opc('data/lacunas.json?v=a3b3e0b02b'),opc('data/novidades.json?v=c7232ca1ba'),opc('data/comunidade.json?v=75e274a13f')])
 .then(function(r){var a=r[0],b=r[1];lac=r[2];nov=r[3];zap=r[4];meta.mt=a.atualizado;meta.mc=b.atualizado;mcDisp=!!b.disponivel;
   todos=(a.nos||[]).concat(b.nos||[]);
   preencheUF($('f-uf'));preencheUF($('o-uf'));preencheUF($('ci-uf'));tudo();
